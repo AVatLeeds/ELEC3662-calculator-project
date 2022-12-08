@@ -18,7 +18,7 @@ LD = arm-none-eabi-ld
 LDFLAGS =	-nostdlib\
 			-nostartfiles\
 			-Map=firmware.map\
-			-T TM4C123GXL_startup.ld
+			-T TM4C123GXL_RTE.ld
 
 SOURCES = 
 
@@ -27,10 +27,10 @@ TARGET = main.cpp
 firmware.bin: firmware.o
 	arm-none-eabi-objcopy -O binary $^ $@
 
-firmware.o: TM4C123GXL_startup.o project.o
+firmware.o: TM4C123GXL_RTE.o project.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
-TM4C123GXL_startup.o: TM4C123GXL_startup.c
+TM4C123GXL_RTE.o: TM4C123GXL_RTE.c
 
 project.o: $(TARGET) $(SOURCES)
 	$(CPP) $(CFLAGS) -I. -r -o $@ $^
