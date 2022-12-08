@@ -36,4 +36,11 @@ project.o: $(TARGET) $(SOURCES)
 	$(CPP) $(CFLAGS) -I. -r -o $@ $^
 
 clean:
-	rm firmware.bin firmware.map firmware.o project.o
+	rm firmware.bin firmware.map *.o
+
+flash:
+	lm4flash -v -S 0x00000000 firmware.bin
+
+debug:
+	lm4flash -v -S 0x00000000 firmware.bin
+	openocd -f /usr/share/openocd/scripts/interface/ti-icdi.cfg -f /usr/share/openocd/scripts/board/ti_ek-tm4c123gxl.cfg
