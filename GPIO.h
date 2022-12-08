@@ -5,8 +5,9 @@
 
 struct GPIO_registers
 {
+    volatile uint32_t DATA_BASE;
+    volatile const uint32_t PADDING0[0xFE];
     volatile uint32_t DATA;
-    volatile const uint32_t PADDING0[0xFF];
     volatile uint32_t DIR;
     volatile uint32_t IS;
     volatile uint32_t IBE;
