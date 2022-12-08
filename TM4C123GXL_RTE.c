@@ -11,8 +11,8 @@ extern uint8_t __data_end;
 extern uint8_t __bss_start;
 extern uint8_t __bss_end;
 
-extern uint8_t __init_array_start;
-extern uint8_t __init_array_end;
+extern void (* __init_array_start)();
+extern void (* __init_array_end)();
 
 extern int main();
 
@@ -24,10 +24,10 @@ void default_handler()
 // Processor interrupt service routines
 void reset();
 void __attribute__((weak, alias("default_handler"))) NMI();
-void hard_fault();
+void __attribute__((weak, alias("default_handler"))) hard_fault();
 void __attribute__((weak, alias("default_handler"))) memory_management();
 void __attribute__((weak, alias("default_handler"))) bus_fault();
-void usage_fault();
+void __attribute__((weak, alias("default_handler"))) usage_fault();
 void __attribute__((weak, alias("default_handler"))) SV_call();
 void __attribute__((weak, alias("default_handler"))) debug_monitor();
 void __attribute__((weak, alias("default_handler"))) pend_SV();
@@ -288,20 +288,4 @@ void reset()
     clock_setup();
 
     main();
-}
-
-void usage_fault()
-{
-    uint32_t do_something = 0;
-    while (1)
-    {
-        do_something ++;
-    }
-}
-
-void hard_fault()
-{
-    static volatile uint32_t _Continue;
-    _Continue = 0U;
-    while (_Continue == 0U);
 }
