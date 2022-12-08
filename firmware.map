@@ -9,200 +9,207 @@ SRAM             0x0000000020000000 0x0000000000008000 xrw
 Linker script and memory map
 
 
-.text           0x0000000000000000      0x414
+.text           0x0000000000000000      0x4a0
                 0x0000000000000000                __text_start = .
- TM4C123GXL_startup.o(.vector_table)
- .vector_table  0x0000000000000000      0x21c TM4C123GXL_startup.o
+ TM4C123GXL_RTE.o(.vector_table)
+ .vector_table  0x0000000000000000      0x21c TM4C123GXL_RTE.o
                 0x0000000000000000                vector_table
-                0x000000000000021c                init_array_start = .
+                0x000000000000021c                __init_array_start = .
  *(.init_array)
-                0x000000000000021c                . = ALIGN (0x4)
-                0x000000000000021c                init_array_end = .
+ .init_array    0x000000000000021c        0x4 project.o
+                0x0000000000000220                . = ALIGN (0x4)
+                0x0000000000000220                __init_array_end = .
  *(.text)
- .text          0x000000000000021c      0x10c TM4C123GXL_startup.o
-                0x000000000000021c                _ISR_timer16_1A
-                0x000000000000021c                _ISR_timer32_5B
-                0x000000000000021c                _ISR_timer16_1B
-                0x000000000000021c                _ISR_timer16_0B
-                0x000000000000021c                pend_SV
-                0x000000000000021c                _ISR_PWM1_generator_3
-                0x000000000000021c                debug_monitor
-                0x000000000000021c                _ISR_ADC1_sequence_2
-                0x000000000000021c                _ISR_PWM1_fault
-                0x000000000000021c                _ISR_SSI_2
-                0x000000000000021c                _ISR_watchdog
-                0x000000000000021c                _ISR_UART_1
-                0x000000000000021c                _ISR_PWM1_generator_0
-                0x000000000000021c                _ISR_timer32_3A
-                0x000000000000021c                _ISR_GPIO_port_E
-                0x000000000000021c                bus_fault
-                0x000000000000021c                _ISR_ADC0_sequence_2
-                0x000000000000021c                _ISR_UART_6
-                0x000000000000021c                _ISR_UART_2
-                0x000000000000021c                _ISR_system_control
-                0x000000000000021c                _ISR_timer16_5B
-                0x000000000000021c                _ISR_flash_and_EEPROM_control
-                0x000000000000021c                _ISR_timer32_5A
-                0x000000000000021c                _ISR_CAN_0
-                0x000000000000021c                _ISR_analogue_comparator_1
-                0x000000000000021c                _ISR_timer16_4A
-                0x000000000000021c                _ISR_I2C_1
-                0x000000000000021c                default_handler
-                0x000000000000021c                _ISR_USB
-                0x000000000000021c                _ISR_timer32_3B
-                0x000000000000021c                _ISR_timer32_1B
-                0x000000000000021c                _ISR_analogue_comparator_0
-                0x000000000000021c                _ISR_timer32_0A
-                0x000000000000021c                _ISR_timer32_4B
-                0x000000000000021c                _ISR_uDMA_software
-                0x000000000000021c                _ISR_UART_7
-                0x000000000000021c                _ISR_QEI_0
-                0x000000000000021c                _ISR_PWM0_generator_1
-                0x000000000000021c                _ISR_ADC1_sequence_3
-                0x000000000000021c                _ISR_UART_5
-                0x000000000000021c                _ISR_ADC0_sequence_0
-                0x000000000000021c                _ISR_timer16_3A
-                0x000000000000021c                _ISR_ADC1_sequence_0
-                0x000000000000021c                SV_call
-                0x000000000000021c                _ISR_SSI_0
-                0x000000000000021c                _ISR_GPIO_port_D
-                0x000000000000021c                _ISR_I2C_3
-                0x000000000000021c                _ISR_timer16_2B
-                0x000000000000021c                _ISR_ADC0_sequence_1
-                0x000000000000021c                _ISR_timer32_1A
-                0x000000000000021c                _ISR_uDMA_error
-                0x000000000000021c                memory_management
-                0x000000000000021c                _ISR_GPIO_port_A
-                0x000000000000021c                _ISR_GPIO_port_B
-                0x000000000000021c                _ISR_I2C_2
-                0x000000000000021c                _ISR_CAN_1
-                0x000000000000021c                _ISR_hibernation_module
-                0x000000000000021c                _ISR_PWM0_fault
-                0x000000000000021c                sys_tick
-                0x000000000000021c                _ISR_PWM1_generator_2
-                0x000000000000021c                _ISR_UART_3
-                0x000000000000021c                _ISR_timer32_2A
-                0x000000000000021c                _ISR_timer16_5A
-                0x000000000000021c                _ISR_timer16_4B
-                0x000000000000021c                _ISR_SSI_3
-                0x000000000000021c                _ISR_PWM0_generator_3
-                0x000000000000021c                _ISR_QEI_1
-                0x000000000000021c                _ISR_I2C_0
-                0x000000000000021c                _ISR_system_exception
-                0x000000000000021c                _ISR_ADC0_sequence_3
-                0x000000000000021c                _ISR_timer32_2B
-                0x000000000000021c                _ISR_UART_4
-                0x000000000000021c                _ISR_timer16_0A
-                0x000000000000021c                _ISR_PWM1_generator_1
-                0x000000000000021c                _ISR_GPIO_port_F
-                0x000000000000021c                _ISR_timer16_3B
-                0x000000000000021c                _ISR_UART_0
-                0x000000000000021c                _ISR_ADC1_sequence_1
-                0x000000000000021c                _ISR_timer32_4A
-                0x000000000000021c                _ISR_PWM0_generator_0
-                0x000000000000021c                _ISR_SSI_1
-                0x000000000000021c                _ISR_timer16_2A
-                0x000000000000021c                _ISR_PWM0_generator_2
-                0x000000000000021c                _ISR_GPIO_port_C
-                0x000000000000021c                _ISR_timer32_0B
-                0x000000000000022e                clock_setup
-                0x0000000000000288                reset
-                0x00000000000002ec                NMI
-                0x00000000000002f2                usage_fault
-                0x0000000000000304                hard_fault
- .text          0x0000000000000328       0xec project.o
-                0x0000000000000328                main
-                0x0000000000000368                PortF_Init()
-                0x00000000000003e4                Delay()
-                0x0000000000000414                . = ALIGN (0x4)
-                0x0000000000000414                __text_end = .
+ .text          0x0000000000000220       0xe4 TM4C123GXL_RTE.o
+                0x0000000000000220                _ISR_timer16_1A
+                0x0000000000000220                _ISR_timer32_5B
+                0x0000000000000220                _ISR_timer16_1B
+                0x0000000000000220                _ISR_timer16_0B
+                0x0000000000000220                pend_SV
+                0x0000000000000220                _ISR_PWM1_generator_3
+                0x0000000000000220                debug_monitor
+                0x0000000000000220                _ISR_ADC1_sequence_2
+                0x0000000000000220                _ISR_PWM1_fault
+                0x0000000000000220                _ISR_SSI_2
+                0x0000000000000220                usage_fault
+                0x0000000000000220                _ISR_watchdog
+                0x0000000000000220                _ISR_UART_1
+                0x0000000000000220                _ISR_PWM1_generator_0
+                0x0000000000000220                _ISR_timer32_3A
+                0x0000000000000220                _ISR_GPIO_port_E
+                0x0000000000000220                bus_fault
+                0x0000000000000220                _ISR_ADC0_sequence_2
+                0x0000000000000220                NMI
+                0x0000000000000220                _ISR_UART_6
+                0x0000000000000220                _ISR_UART_2
+                0x0000000000000220                _ISR_system_control
+                0x0000000000000220                _ISR_timer16_5B
+                0x0000000000000220                _ISR_flash_and_EEPROM_control
+                0x0000000000000220                _ISR_timer32_5A
+                0x0000000000000220                _ISR_CAN_0
+                0x0000000000000220                _ISR_analogue_comparator_1
+                0x0000000000000220                _ISR_timer16_4A
+                0x0000000000000220                _ISR_I2C_1
+                0x0000000000000220                default_handler
+                0x0000000000000220                _ISR_USB
+                0x0000000000000220                _ISR_timer32_3B
+                0x0000000000000220                _ISR_timer32_1B
+                0x0000000000000220                hard_fault
+                0x0000000000000220                _ISR_analogue_comparator_0
+                0x0000000000000220                _ISR_timer32_0A
+                0x0000000000000220                _ISR_timer32_4B
+                0x0000000000000220                _ISR_uDMA_software
+                0x0000000000000220                _ISR_UART_7
+                0x0000000000000220                _ISR_QEI_0
+                0x0000000000000220                _ISR_PWM0_generator_1
+                0x0000000000000220                _ISR_ADC1_sequence_3
+                0x0000000000000220                _ISR_UART_5
+                0x0000000000000220                _ISR_ADC0_sequence_0
+                0x0000000000000220                _ISR_timer16_3A
+                0x0000000000000220                _ISR_ADC1_sequence_0
+                0x0000000000000220                SV_call
+                0x0000000000000220                _ISR_SSI_0
+                0x0000000000000220                _ISR_GPIO_port_D
+                0x0000000000000220                _ISR_I2C_3
+                0x0000000000000220                _ISR_timer16_2B
+                0x0000000000000220                _ISR_ADC0_sequence_1
+                0x0000000000000220                _ISR_timer32_1A
+                0x0000000000000220                _ISR_uDMA_error
+                0x0000000000000220                memory_management
+                0x0000000000000220                _ISR_GPIO_port_A
+                0x0000000000000220                _ISR_GPIO_port_B
+                0x0000000000000220                _ISR_I2C_2
+                0x0000000000000220                _ISR_CAN_1
+                0x0000000000000220                _ISR_hibernation_module
+                0x0000000000000220                _ISR_PWM0_fault
+                0x0000000000000220                sys_tick
+                0x0000000000000220                _ISR_PWM1_generator_2
+                0x0000000000000220                _ISR_UART_3
+                0x0000000000000220                _ISR_timer32_2A
+                0x0000000000000220                _ISR_timer16_5A
+                0x0000000000000220                _ISR_timer16_4B
+                0x0000000000000220                _ISR_SSI_3
+                0x0000000000000220                _ISR_PWM0_generator_3
+                0x0000000000000220                _ISR_QEI_1
+                0x0000000000000220                _ISR_I2C_0
+                0x0000000000000220                _ISR_system_exception
+                0x0000000000000220                _ISR_ADC0_sequence_3
+                0x0000000000000220                _ISR_timer32_2B
+                0x0000000000000220                _ISR_UART_4
+                0x0000000000000220                _ISR_timer16_0A
+                0x0000000000000220                _ISR_PWM1_generator_1
+                0x0000000000000220                _ISR_GPIO_port_F
+                0x0000000000000220                _ISR_timer16_3B
+                0x0000000000000220                _ISR_UART_0
+                0x0000000000000220                _ISR_ADC1_sequence_1
+                0x0000000000000220                _ISR_timer32_4A
+                0x0000000000000220                _ISR_PWM0_generator_0
+                0x0000000000000220                _ISR_SSI_1
+                0x0000000000000220                _ISR_timer16_2A
+                0x0000000000000220                _ISR_PWM0_generator_2
+                0x0000000000000220                _ISR_GPIO_port_C
+                0x0000000000000220                _ISR_timer32_0B
+                0x0000000000000226                clock_setup
+                0x0000000000000280                reset
+ .text          0x0000000000000304      0x19c project.o
+                0x0000000000000304                main
+                0x0000000000000318                hard_fault()
+                0x000000000000032c                usage_fault()
+                0x0000000000000340                bus_fault()
+                0x0000000000000390                status_LED::status_LED()
+                0x0000000000000390                status_LED::status_LED()
+                0x00000000000003e4                status_LED::set_status(unsigned char)
+                0x0000000000000434                status_LED::get_status()
+                0x000000000000044c                status_LED::operator=(unsigned char)
+                0x00000000000004a0                . = ALIGN (0x4)
+                0x00000000000004a0                __text_end = .
 
-.glue_7         0x0000000000000414        0x0
- .glue_7        0x0000000000000414        0x0 linker stubs
+.glue_7         0x00000000000004a0        0x0
+ .glue_7        0x00000000000004a0        0x0 linker stubs
 
-.glue_7t        0x0000000000000414        0x0
- .glue_7t       0x0000000000000414        0x0 linker stubs
+.glue_7t        0x00000000000004a0        0x0
+ .glue_7t       0x00000000000004a0        0x0 linker stubs
 
-.vfp11_veneer   0x0000000000000414        0x0
- .vfp11_veneer  0x0000000000000414        0x0 linker stubs
+.vfp11_veneer   0x00000000000004a0        0x0
+ .vfp11_veneer  0x00000000000004a0        0x0 linker stubs
 
-.v4_bx          0x0000000000000414        0x0
- .v4_bx         0x0000000000000414        0x0 linker stubs
+.v4_bx          0x00000000000004a0        0x0
+ .v4_bx         0x00000000000004a0        0x0 linker stubs
 
-.iplt           0x0000000000000414        0x0
- .iplt          0x0000000000000414        0x0 TM4C123GXL_startup.o
+.iplt           0x00000000000004a0        0x0
+ .iplt          0x00000000000004a0        0x0 TM4C123GXL_RTE.o
 
-.rel.dyn        0x0000000000000414        0x0
- .rel.iplt      0x0000000000000414        0x0 TM4C123GXL_startup.o
+.rel.dyn        0x00000000000004a0        0x0
+ .rel.iplt      0x00000000000004a0        0x0 TM4C123GXL_RTE.o
 
-.rodata         0x0000000000000414        0x0
+.rodata         0x00000000000004a0        0x0
  *(.rodata)
-                0x0000000000000414                . = ALIGN (0x4)
+                0x00000000000004a0                . = ALIGN (0x4)
 
-.data           0x0000000000000414        0x0 load address 0x0000000020000000
-                0x0000000000000414                __data_start = .
+.data           0x00000000000004a0        0x0 load address 0x0000000020000000
+                0x00000000000004a0                __data_start = .
  *(.data)
- .data          0x0000000000000414        0x0 TM4C123GXL_startup.o
- .data          0x0000000000000414        0x0 project.o
-                0x0000000000000414                . = ALIGN (0x4)
-                0x0000000000000414                __data_end = .
+ .data          0x00000000000004a0        0x0 TM4C123GXL_RTE.o
+ .data          0x00000000000004a0        0x0 project.o
+                0x00000000000004a0                . = ALIGN (0x4)
+                0x00000000000004a0                __data_end = .
 
-.igot.plt       0x0000000000000414        0x0 load address 0x0000000020000000
- .igot.plt      0x0000000000000414        0x0 TM4C123GXL_startup.o
+.igot.plt       0x00000000000004a0        0x0 load address 0x0000000020000000
+ .igot.plt      0x00000000000004a0        0x0 TM4C123GXL_RTE.o
 
-.bss            0x0000000020000000        0xc
+.bss            0x0000000020000000        0x4
                 0x0000000020000000                __bss_start = .
  *(.bss)
- .bss           0x0000000020000000        0x4 TM4C123GXL_startup.o
- .bss           0x0000000020000004        0x8 project.o
-                0x0000000020000004                In
-                0x0000000020000008                Out
-                0x000000002000000c                . = ALIGN (0x4)
-                0x000000002000000c                __bss_end = .
-LOAD TM4C123GXL_startup.o
+ .bss           0x0000000020000000        0x0 TM4C123GXL_RTE.o
+ .bss           0x0000000020000000        0x1 project.o
+                0x0000000020000000                status
+                0x0000000020000004                . = ALIGN (0x4)
+ *fill*         0x0000000020000001        0x3 
+                0x0000000020000004                __bss_end = .
+LOAD TM4C123GXL_RTE.o
 LOAD project.o
 OUTPUT(firmware.o elf32-littlearm)
 LOAD linker stubs
 
-.debug_info     0x0000000000000000      0xd2e
- .debug_info    0x0000000000000000      0xc68 TM4C123GXL_startup.o
- .debug_info    0x0000000000000c68       0xc6 project.o
+.noinit         0x0000000020000004        0x1
+ .noinit        0x0000000020000004        0x1 project.o
 
-.debug_abbrev   0x0000000000000000      0x223
- .debug_abbrev  0x0000000000000000      0x198 TM4C123GXL_startup.o
- .debug_abbrev  0x0000000000000198       0x8b project.o
+.debug_info     0x0000000000000000     0x1272
+ .debug_info    0x0000000000000000      0xc1f TM4C123GXL_RTE.o
+ .debug_info    0x0000000000000c1f      0x653 project.o
 
-.debug_aranges  0x0000000000000000       0x40
+.debug_abbrev   0x0000000000000000      0x3da
+ .debug_abbrev  0x0000000000000000      0x13d TM4C123GXL_RTE.o
+ .debug_abbrev  0x000000000000013d      0x29d project.o
+
+.debug_aranges  0x0000000000000000       0x60
  .debug_aranges
-                0x0000000000000000       0x20 TM4C123GXL_startup.o
+                0x0000000000000000       0x20 TM4C123GXL_RTE.o
  .debug_aranges
-                0x0000000000000020       0x20 project.o
+                0x0000000000000020       0x40 project.o
 
-.debug_line     0x0000000000000000      0x1d4
- .debug_line    0x0000000000000000      0x11a TM4C123GXL_startup.o
- .debug_line    0x000000000000011a       0xba project.o
+.debug_line     0x0000000000000000      0x291
+ .debug_line    0x0000000000000000       0xf5 TM4C123GXL_RTE.o
+ .debug_line    0x00000000000000f5      0x19c project.o
 
-.debug_str      0x0000000000000000      0x865
- .debug_str     0x0000000000000000      0x751 TM4C123GXL_startup.o
-                                        0x78f (size before relaxing)
- .debug_str     0x0000000000000751      0x114 project.o
-                                        0x148 (size before relaxing)
+.debug_str      0x0000000000000000      0xa35
+ .debug_str     0x0000000000000000      0x753 TM4C123GXL_RTE.o
+                                        0x791 (size before relaxing)
+ .debug_str     0x0000000000000753      0x2e2 project.o
+                                        0x5c9 (size before relaxing)
 
 .comment        0x0000000000000000       0x51
- .comment       0x0000000000000000       0x51 TM4C123GXL_startup.o
+ .comment       0x0000000000000000       0x51 TM4C123GXL_RTE.o
                                          0x52 (size before relaxing)
- .comment       0x0000000000000051       0x52 project.o
+ .comment       0x0000000000000051       0xa4 project.o
 
 .ARM.attributes
                 0x0000000000000000       0x34
  .ARM.attributes
-                0x0000000000000000       0x34 TM4C123GXL_startup.o
+                0x0000000000000000       0x34 TM4C123GXL_RTE.o
  .ARM.attributes
                 0x0000000000000034       0x34 project.o
 
-.noinit         0x0000000000000000        0x0
- .noinit        0x0000000000000000        0x0 project.o
-
-.debug_frame    0x0000000000000000      0x140
- .debug_frame   0x0000000000000000       0xc4 TM4C123GXL_startup.o
- .debug_frame   0x00000000000000c4       0x7c project.o
+.debug_frame    0x0000000000000000      0x1dc
+ .debug_frame   0x0000000000000000       0x6c TM4C123GXL_RTE.o
+ .debug_frame   0x000000000000006c      0x170 project.o

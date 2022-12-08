@@ -20,7 +20,7 @@ LDFLAGS =	-nostdlib\
 			-Map=firmware.map\
 			-T TM4C123GXL_RTE.ld
 
-SOURCES = 
+SOURCES = status.cpp\
 
 TARGET = main.cpp
 
