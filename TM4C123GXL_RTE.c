@@ -11,6 +11,9 @@ extern uint8_t __data_end;
 extern uint8_t __bss_start;
 extern uint8_t __bss_end;
 
+extern uint8_t __init_array_start;
+extern uint8_t __init_array_end;
+
 extern int main();
 
 void default_handler()
@@ -20,7 +23,7 @@ void default_handler()
 
 // Processor interrupt service routines
 void reset();
-void __attribute__((weak, alias("default_handler")))NMI();
+void __attribute__((weak, alias("default_handler"))) NMI();
 void hard_fault();
 void __attribute__((weak, alias("default_handler"))) memory_management();
 void __attribute__((weak, alias("default_handler"))) bus_fault();
@@ -261,6 +264,7 @@ void clock_setup()
 
 void reset()
 {
+    // populate SRAM with data and bss
     uint8_t * src, * dest;
 
     src = &__text_end;
@@ -272,6 +276,13 @@ void reset()
     for (dest = &__bss_start; dest < &__bss_end;)
     {
         *dest++ = 0;
+    }
+
+    // run constructors
+    void (** constructor_ptr)();
+    for (constructor_ptr = &__init_array_start; constructor_ptr < &__init_array_end;)
+    {
+        (*constructor_ptr++)();
     }
 
     clock_setup();

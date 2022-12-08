@@ -17,11 +17,11 @@ SECTIONS
     .text :
     {
         __text_start = .;
-        TM4C123GXL_startup.o(.vector_table)
-        init_array_start = .;
+        TM4C123GXL_RTE.o(.vector_table)
+        __init_array_start = .;
         *(.init_array)
         . = ALIGN(4);
-        init_array_end = .;
+        __init_array_end = .;
         *(.text)
         . = ALIGN(4);
         __text_end = .;
