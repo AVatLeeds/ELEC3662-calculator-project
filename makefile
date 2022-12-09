@@ -20,7 +20,9 @@ LDFLAGS =	-nostdlib\
 			-Map=firmware.map\
 			-T TM4C123GXL_RTE.ld
 
-SOURCES = status.cpp\
+SOURCES =	status.cpp\
+			keypad.cpp\
+			LCD_driver.cpp\
 
 TARGET = main.cpp
 
