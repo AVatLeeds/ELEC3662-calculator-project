@@ -15,7 +15,7 @@ class Keypad
     uint16_t value();
 
     private:
-    uint8_t     _poll_counter = 0;
+    uint8_t     _shift_counter = 0;
     uint32_t    _keypad_state;
 };
 
