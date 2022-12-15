@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "SYSCTL.h"
+#include "SYSTICK.h"
 #include "GPIO.h"
 #include "LCD_driver.h"
 
@@ -43,78 +44,42 @@ LCD_driver::LCD_driver()
     PORTC->DEN |= 0xF0;
 
     RS = LOW;
+    delay_us(15000); // delay ~15 ms
     _write_upper_nibble(MODE_8BIT);
-    for (uint32_t i = 10000; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(4500); // delay ~4.5 ms
     _write_upper_nibble(MODE_8BIT);
-    for (uint32_t i = 10000; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(100); // delay ~100 us
     _write_upper_nibble(MODE_8BIT);
-    for (uint32_t i = 200; i > 0; i --)
-    {
-        __asm__("nop");
-    }
     _write_upper_nibble(MODE_4BIT);
-    for (uint32_t i = 200; i > 0; i --)
-    {
-        __asm__("nop");
-    }
     _command(FUNCTION_SET | MODE_4BIT | TWO_LINE);
     _command(DISPLAY_SETUP);
     _command(LCD_CLEAR);
-    _command(DISPLAY_SETUP | DISPLAY_ON | CURSOR_ON | CURSOR_BLINK);
+    _command(DISPLAY_SETUP | DISPLAY_ON | CURSOR_ON); //| CURSOR_BLINK);
     _command(ENTRY_MODE | INCREMENT_CURSOR);
 }
 
 void LCD_driver::_write_lower_nibble(uint8_t data_byte)
 {
-    uint32_t i;
     data_byte <<= 4;
     PORTC->DIR |= 0xF0; // need a more explicit way of setting LCD data pins to output / input
     RW = LOW;
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
     EN = HIGH;
     LCD_DATA_PINS = data_byte;
-    for (i = 20; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(1);
     EN = LOW;
-    for (i = 20; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(1);
     LCD_DATA_PINS = 0x00;
 }
 
 void LCD_driver::_write_upper_nibble(uint8_t data_byte)
 {
-    uint32_t i;
     PORTC->DIR |= 0xF0; // need a more explicit way of setting LCD data pins to output / input
     RW = LOW;
-    
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
     EN = HIGH;
     LCD_DATA_PINS = data_byte;
-    for (i = 20; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(1);
     EN = LOW;
-    for (i = 20; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(1);
     LCD_DATA_PINS = 0x00;
 }
 
@@ -125,35 +90,21 @@ uint8_t LCD_driver::_check_busy()
     PORTC->DIR &= ~0xF0; // need a more explicit way of setting LCD data pins to output / input
     RS = LOW;
     RW = HIGH;
+    // small delay required here to meet the minimum 40 ns t_AS requirement during read
     __asm__("nop");
     __asm__("nop");
     __asm__("nop");
     __asm__("nop");
     EN = HIGH;
-    for (i = 16; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(0.5);   
     busy = LCD_DATA_PINS & 0x80;
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
+    delay_us(0.5);   
     EN = LOW;
-    for (i = 20; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(1);
     EN = HIGH;
-    for (i = 20; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(1);
     EN = LOW;
-    for (i = 20; i > 0; i --)
-    {
-        __asm__("nop");
-    }
+    delay_us(1);
     return busy;
 }
 
