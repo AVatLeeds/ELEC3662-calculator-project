@@ -1,8 +1,10 @@
 #include <stdint.h>
 #include "SYSCTL.h"
+#include "SYSTICK.h"
 
 #define _GNU_SOURCE
 #define STACK_TOP   0x20008000U
+#define F_CPU       80000000
 
 extern uint8_t __text_start;
 extern uint8_t __text_end;
@@ -278,14 +280,19 @@ void reset()
         *dest++ = 0;
     }
 
-    // run constructors
+    clock_setup();
+
+    // SYSTICK setup
+    STRELOAD = 0x0;
+    STCURRENT = 0x0;
+    STCTRL = 0x4; // enable systick and set clock source to system clock
+
+        // run constructors
     void (** constructor_ptr)();
     for (constructor_ptr = &__init_array_start; constructor_ptr < &__init_array_end;)
     {
         (*constructor_ptr++)();
     }
-
-    clock_setup();
 
     main();
 }
