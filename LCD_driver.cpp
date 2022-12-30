@@ -85,7 +85,6 @@ void LCD_driver::_write_upper_nibble(uint8_t data_byte)
 
 uint8_t LCD_driver::_check_busy()
 {
-    uint32_t i;
     uint8_t busy;
     PORTC->DIR &= ~0xF0; // need a more explicit way of setting LCD data pins to output / input
     RS = LOW;
@@ -110,7 +109,6 @@ uint8_t LCD_driver::_check_busy()
 
 void LCD_driver::_command(uint8_t data_byte)
 {
-    uint32_t i;
     while (_check_busy());
     RS = LOW;
     _write_upper_nibble(data_byte);
@@ -122,7 +120,6 @@ void LCD_driver::clear(void) {
 }
 
 void LCD_driver::putchar(char character) {
-    uint32_t i;
     while (_check_busy());
     RS = HIGH;
     _write_upper_nibble(character);
