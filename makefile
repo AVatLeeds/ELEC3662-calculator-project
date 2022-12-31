@@ -7,11 +7,13 @@ CFLAGS =	-g\
 			-mthumb\
 			-mno-thumb-interwork\
 			-mcpu=cortex-m4\
-			-mfloat-abi=hard\
+			-mfloat-abi=soft\
 			-nostartfiles\
 			-fno-rtti\
 			-fsingle-precision-constant\
-			-fno-exceptions
+			-fno-exceptions\
+			-specs=nano.specs\
+			-static\
 
 LD = arm-none-eabi-ld
 
@@ -23,6 +25,8 @@ LDFLAGS =	-nostdlib\
 SOURCES =	status.cpp\
 			keypad.cpp\
 			LCD_driver.cpp\
+			calculator.cpp\
+			recursive_descent.cpp\
 
 TARGET = main.cpp
 
@@ -35,7 +39,7 @@ firmware.o: TM4C123GXL_RTE.o project.o
 TM4C123GXL_RTE.o: TM4C123GXL_RTE.c
 
 project.o: $(TARGET) $(SOURCES)
-	$(CPP) $(CFLAGS) -I. -r -o $@ $^
+	$(CPP) $(CFLAGS) -r -o $@ $^
 
 clean:
 	rm firmware.bin firmware.map *.o
@@ -45,4 +49,4 @@ flash:
 
 debug:
 	lm4flash -v -S 0x00000000 firmware.bin
-	openocd -f /usr/share/openocd/scripts/interface/ti-icdi.cfg -f /usr/share/openocd/scripts/board/ti_ek-tm4c123gxl.cfg
+	openocd -f /usr/share/openocd/scripts/interface/ti-icdi.cfg -f /usr/share/openocd/scripts/board/ek-tm4c123gxl.cfg
