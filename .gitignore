@@ -29,11 +29,11 @@
 
 # Executables
 *.exe
+*.exec
 *.out
 *.app
 
 *.bin
-
 *.backup
 .vscode
 
