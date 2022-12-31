@@ -1,9 +1,10 @@
 #include <stdint.h>
+#include <sys/types.h>
 #include "SYSCTL.h"
 #include "SYSTICK.h"
 
 #define _GNU_SOURCE
-#define STACK_TOP   0x20008000U
+#define STACK_TOP   0x20008000
 #define F_CPU       80000000
 
 extern uint8_t __text_start;
@@ -15,6 +16,12 @@ extern uint8_t __bss_end;
 
 extern void (* __init_array_start)();
 extern void (* __init_array_end)();
+
+extern char __heap_start;
+extern char __heap_end;
+
+#define HEAP_SIZE 0x00000040
+static uint8_t __attribute__((section(".heap"))) heap[HEAP_SIZE];
 
 extern int main();
 
@@ -253,6 +260,25 @@ void __attribute__((section(".vector_table"))) (* vector_table[])() = {
     _ISR_PWM1_generator_3,
     _ISR_PWM1_fault
 };
+
+caddr_t _sbrk(int incr)
+{
+    static char *head;
+    char *prev_head;
+    
+    if (head == 0) head = &__heap_start;
+
+    prev_head = head;
+
+    if ((head + incr) > (char*)&__heap_end)
+    {
+        return ((void*)-1); // error - no more memory
+    }
+
+    head += incr;
+
+    return (caddr_t)prev_head;
+}
 
 void clock_setup()
 {

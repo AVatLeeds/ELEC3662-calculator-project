@@ -39,13 +39,22 @@ SECTIONS
         *(.data)
         . = ALIGN(4);
         __data_end = .;
-    } > FLASH AT > SRAM
+    } > SRAM AT > FLASH
 
     .bss :
     {
         __bss_start = .;
         *(.bss)
+        *(.bss.*)
         . = ALIGN(4);
         __bss_end = .;
+    } > SRAM AT > SRAM
+
+    .heap (NOLOAD) :
+    {
+        __heap_start = .;
+        TM4C123GXL_RTE.o(.heap)
+        __heap_end = .;
     } > SRAM
+    
 }
