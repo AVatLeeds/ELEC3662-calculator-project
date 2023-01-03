@@ -77,11 +77,11 @@ int parse_term(char * &source_text, double &result)
     double temp;
     if (parse_power(source_text, result))
     {
-        while (*source_text == '*' || *source_text == (char)0xFD) // 0xFD is the value of the divide character on the LCD display
+        while (*source_text == 'x' || *source_text == (char)0xFD) // 0xFD is the value of the divide character on the LCD display
         {
             switch (*source_text)
             {
-                case '*':
+                case 'x':
                 source_text ++;
                 if (parse_power(source_text, temp)) result *= temp;
                 else return 0;
