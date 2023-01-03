@@ -54,10 +54,15 @@ int main(void)
             case 0x1080: pressed ? : (calc.buffer_insert('('), pressed = 1); break;
             case 0x1020: pressed ? : (calc.buffer_insert(')'), pressed = 1); break;
 
-            case 0x1040: pressed ? : (calc.buffer_insert_text("Hello Oti"), pressed = 1); break;
+            case 0x1100: pressed ? : (calc.buffer_insert_text("ANS"), pressed = 1); break;
+
+            case 0x1040: pressed ? : (pressed = 1); break;
+            case 0x1004: pressed ? : (pressed = 1); break;
 
             case 0x0100: pressed ? : (calc.toggle_sign(), pressed = 1); break;
-            case 0x0010: pressed ? : (calc.buffer_backspace(), pressed = 1); break;  
+            case 0x1010:
+            case 0x0010: pressed ? : (calc.buffer_backspace(), pressed = 1); break; 
+            case 0x1001:
             case 0x0001: pressed ? : (calc.evaluate(), pressed = 1); break;
 
             case 0x1008: pressed ? : (calc.cursor_left(), pressed = 1); break;
@@ -86,5 +91,17 @@ void usage_fault()
 void bus_fault()
 {
     status = YELLOW;
+    while (1);
+}
+
+void NMI()
+{
+    status = BLUE;
+    while (1);
+}
+
+void _ISR_system_control()
+{
+    status = CYAN;
     while (1);
 }
