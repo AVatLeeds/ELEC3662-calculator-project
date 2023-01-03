@@ -7,6 +7,7 @@
 class Calculator
 {
     public:
+    
     Calculator();
 
     void buffer_insert(char character);
@@ -20,6 +21,9 @@ class Calculator
     void evaluate();
 
     private:
+
+    void display_result();
+
     LCD_driver _LCD;
     char _expression_buffer[4096];
     uint16_t _pos = 0;

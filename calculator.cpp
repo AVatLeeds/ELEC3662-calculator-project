@@ -1,7 +1,12 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <cmath>
 #include "calculator.h"
 #include "recursive_descent.h"
+
+#define emax    1023
+#define emin    -1022
+#define bias    emax
 
 Calculator::Calculator() : _LCD()
 {
@@ -114,13 +119,98 @@ void Calculator::evaluate()
 {
     char * expression = _expression_buffer;
     _LCD.cursor_pos(1, 0);
-    int return_value;
+    _LCD.print("                "); // a hack to clear the row. REPLACE!!
+    _LCD.cursor_pos(1, 0);
+
     if (parse_expression(expression, _result))
     {
-        return_value = snprintf(_result_buffer, 16, "%f", _result);
-        _LCD.print(_result_buffer);
+        display_result();
     }
     else {
     _LCD.print("Bad expression");
+    }
+}
+
+void Calculator::display_result()
+{
+    uint64_t double_bits = *reinterpret_cast<uint64_t *>(&_result);
+
+    uint8_t S = (double_bits & 0x8000000000000000) ? 1 : 0;
+    uint16_t E = (uint16_t)((double_bits & 0x7FF0000000000000UL) >> 52);
+    uint64_t T = double_bits & 0x000FFFFFFFFFFFFFUL;
+
+    if (_result < 0) _result *= -1;
+
+    int exponent;
+    double mantissa = frexp(_result, &exponent);
+
+    double normalised_decimal_exponent;
+    int decimal_exponent;
+    double decimal_value;
+
+    char number_text[16];
+    uint8_t text_idx = 0;
+
+    if (exponent == 0x7FF)
+    {
+        if (T)
+        {
+            _LCD.print("NaN");
+        }
+        else
+        {
+            if (S)
+            {
+                _LCD.print("-Inf");
+            }
+            else
+            {
+                _LCD.print("+Inf");
+            }
+        }
+    }
+    else if (!E && !T)
+    {
+        if (S)
+        {
+            _LCD.print("-0.0");
+        }
+        else
+        {
+            _LCD.print("+0.0");
+        }
+    }
+    else
+    {
+        normalised_decimal_exponent = std::log10(mantissa) + (double)exponent * std::log10(2.0);
+        decimal_exponent = (int)normalised_decimal_exponent;
+        decimal_value = pow(10, normalised_decimal_exponent - (double)decimal_exponent);
+        
+        int integer = (int)(decimal_value * 10000000);
+
+        _LCD.putchar(S ? '-' : '+');
+        text_idx = 9;
+        number_text[text_idx --] = '\0';
+        while (text_idx > 1)
+        {
+            number_text[text_idx --] = '0' + (integer % 10);
+            integer /= 10;
+        }
+        number_text[text_idx --] = '.';
+        number_text[text_idx] = '0' + (integer % 10);
+        _LCD.print(number_text);
+        _LCD.putchar(' ');
+        _LCD.putchar('E');
+        _LCD.putchar((decimal_exponent < 0) ? '-' : '+');
+        
+        text_idx = 3;
+        number_text[text_idx --] = '\0';
+        while (text_idx > 0)
+        {
+            number_text[text_idx --] = '0' + (decimal_exponent % 10);
+            decimal_exponent /= 10;
+        }
+        number_text[text_idx] = '0' + (decimal_exponent % 10);
+        _LCD.print(number_text);
     }
 }
