@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <cmath>
 #include "calculator.h"
 #include "recursive_descent.h"
@@ -15,6 +16,7 @@ Calculator::Calculator() : _LCD()
 
 void Calculator::buffer_insert(char character)
 {
+    if (computed) buffer_clear(), computed = false;
     if (_pos < _head)
     {
         for (uint16_t i = _head; i > _pos; _expression_buffer[i] = _expression_buffer[i - 1], i --); 
@@ -26,8 +28,29 @@ void Calculator::buffer_insert(char character)
     _LCD.cursor_pos(0, _pos - _window_start);
 }
 
+void Calculator::buffer_insert_text(const char * text)
+{
+    if (computed) buffer_clear(), computed = false;
+    unsigned int length = 0;
+    while (text[length ++]);
+    if (_pos < _head)
+    {
+        for (uint16_t i = _head + length - 1; i > _pos; _expression_buffer[i] = _expression_buffer[i - length], i --); 
+    }
+    length = 0;
+    while (text[length])
+    {
+        _expression_buffer[_pos ++] = text[length ++];
+    }
+    _head += length;
+    if (_pos == (_window_start + _window_length)) _window_start += length;
+    buffer_redisplay();
+    _LCD.cursor_pos(0, _pos - _window_start);
+}
+
 void Calculator::buffer_backspace()
 {
+    computed = false;
     if (_pos)
     {
         _pos--;
@@ -56,6 +79,7 @@ void Calculator::buffer_clear()
 
 void Calculator::cursor_left()
 {
+    computed = false;
     if (_pos)
     {
         _pos --;
@@ -70,6 +94,7 @@ void Calculator::cursor_left()
 
 void Calculator::cursor_right()
 {
+    computed = false;
     if (_pos < _head)
     {
         _pos ++;
@@ -84,6 +109,7 @@ void Calculator::cursor_right()
 
 void Calculator::buffer_redisplay()
 {
+    clear_result();
     _LCD.cursor_pos(0, 0);
     for (uint8_t i = _window_start; i < (_window_start + _window_length); i ++)
     {
@@ -98,37 +124,62 @@ void Calculator::buffer_redisplay()
     }
 }
 
-void Calculator::buffer_insert_text(const char * text)
-{
-    _LCD.print(text);
-}
-
 void Calculator::toggle_sign()
 {
-    if (_expression_buffer[_pos] == '-')
+    uint16_t save_pos;
+
+    save_pos = _pos;
+
+    while ((isdigit(_expression_buffer[_pos]) || _pos == _head) && _pos)
     {
+        cursor_left();
+    }
+
+    if (_pos == 0)
+    {
+        if (_expression_buffer[_pos] == '-')
+        {
+            cursor_right();
+            buffer_backspace();
+            if (save_pos) save_pos --;
+        }
+        else
+        {
+            buffer_insert('-');
+            save_pos ++;
+        }
+    }
+    else if (_expression_buffer[_pos] == '-' && !isdigit(_expression_buffer[_pos - 1]))
+    {
+        cursor_right();
         buffer_backspace();
+        if (save_pos - _pos) save_pos --;
     }
-    else
+    else if (_pos != save_pos)
     {
+        cursor_right();
         buffer_insert('-');
+        save_pos ++;
     }
+
+    _pos = save_pos;
+    _LCD.cursor_pos(0, _pos);
 }
 
 void Calculator::evaluate()
 {
-    char * expression = _expression_buffer;
+    clear_result();
+    if (parser(_expression_buffer, _result)) display_result();
+    else _LCD.print("Bad expression");
+    computed = true;
+    _pos = _head;
+}
+
+void Calculator::clear_result()
+{
     _LCD.cursor_pos(1, 0);
     _LCD.print("                "); // a hack to clear the row. REPLACE!!
     _LCD.cursor_pos(1, 0);
-
-    if (parse_expression(expression, _result))
-    {
-        display_result();
-    }
-    else {
-    _LCD.print("Bad expression");
-    }
 }
 
 void Calculator::display_result()
@@ -186,7 +237,7 @@ void Calculator::display_result()
         decimal_exponent = (int)normalised_decimal_exponent;
         decimal_value = pow(10, normalised_decimal_exponent - (double)decimal_exponent);
         
-        int integer = (int)(decimal_value * 10000000);
+        int integer = (int)round((decimal_value * 10000000));
 
         _LCD.putchar(S ? '-' : '+');
         text_idx = 9;
@@ -202,6 +253,7 @@ void Calculator::display_result()
         _LCD.putchar(' ');
         _LCD.putchar('E');
         _LCD.putchar((decimal_exponent < 0) ? '-' : '+');
+        decimal_exponent *= (decimal_exponent < 0) ? -1 : 1;
         
         text_idx = 3;
         number_text[text_idx --] = '\0';

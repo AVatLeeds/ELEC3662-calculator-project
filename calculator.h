@@ -23,6 +23,8 @@ class Calculator
     private:
 
     void display_result();
+    void clear_result();
+    bool computed = false;
 
     LCD_driver _LCD;
     char _expression_buffer[4096];
