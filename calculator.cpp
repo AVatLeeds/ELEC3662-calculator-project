@@ -168,6 +168,7 @@ void Calculator::toggle_sign()
 
 void Calculator::evaluate()
 {
+    _expression_buffer[_head] = '\0';
     clear_result();
     if (parser(_expression_buffer, _result)) display_result();
     else _LCD.print("Bad expression");
@@ -184,16 +185,17 @@ void Calculator::clear_result()
 
 void Calculator::display_result()
 {
-    uint64_t double_bits = *reinterpret_cast<uint64_t *>(&_result);
+    double display_value = _result;
+    uint64_t double_bits = *reinterpret_cast<uint64_t *>(&display_value);
 
     uint8_t S = (double_bits & 0x8000000000000000) ? 1 : 0;
     uint16_t E = (uint16_t)((double_bits & 0x7FF0000000000000UL) >> 52);
     uint64_t T = double_bits & 0x000FFFFFFFFFFFFFUL;
 
-    if (_result < 0) _result *= -1;
+    if (display_value < 0) display_value *= -1;
 
     int exponent;
-    double mantissa = frexp(_result, &exponent);
+    double mantissa = frexp(display_value, &exponent);
 
     double normalised_decimal_exponent;
     int decimal_exponent;
@@ -202,7 +204,7 @@ void Calculator::display_result()
     char number_text[16];
     uint8_t text_idx = 0;
 
-    if (exponent == 0x7FF)
+    if (E == 0x7FF)
     {
         if (T)
         {
@@ -233,22 +235,33 @@ void Calculator::display_result()
     }
     else
     {
+        uint8_t number_length = 8;
+        uint8_t fraction_digits = number_length - 1;
         normalised_decimal_exponent = std::log10(mantissa) + (double)exponent * std::log10(2.0);
         decimal_exponent = (int)normalised_decimal_exponent;
         decimal_value = pow(10, normalised_decimal_exponent - (double)decimal_exponent);
-        
-        int integer = (int)round((decimal_value * 10000000));
+        if (decimal_exponent > 0 && decimal_exponent < 7)
+        {
+            fraction_digits = number_length - decimal_exponent - 1;
+            decimal_exponent = 0;
+        }
+        int integer = (int)round((decimal_value * pow(10, number_length - 1)));
 
         _LCD.putchar(S ? '-' : '+');
-        text_idx = 9;
+        text_idx = number_length + 1;
         number_text[text_idx --] = '\0';
-        while (text_idx > 1)
+        while (fraction_digits --)
         {
             number_text[text_idx --] = '0' + (integer % 10);
             integer /= 10;
         }
         number_text[text_idx --] = '.';
-        number_text[text_idx] = '0' + (integer % 10);
+        while (text_idx)
+        {
+            number_text[text_idx --] = '0' + (integer % 10);
+            integer /= 10;
+        }
+        number_text[text_idx --] = '0' + (integer % 10);
         _LCD.print(number_text);
         _LCD.putchar(' ');
         _LCD.putchar('E');
