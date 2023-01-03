@@ -41,7 +41,7 @@ int parse_term(char * &source_text, double &result)
     double temp;
     if (parse_factor(source_text, result))
     {
-        while (*source_text == '*' || *source_text == '/')
+        while (*source_text == '*' || *source_text == (char)0xFD) // 0xFD is the value of the divide character on the LCD display
         {
             switch (*source_text)
             {
@@ -51,7 +51,7 @@ int parse_term(char * &source_text, double &result)
                 else return 0;
                 break;
 
-                case '/':
+                case 0xFD: // 0xFD is the value of the divide character on the LCD display
                 source_text ++;
                 if (parse_factor(source_text, temp)) result /= temp;
                 else return 0;
