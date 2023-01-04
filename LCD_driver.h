@@ -37,6 +37,12 @@ class LCD_driver
     LCD_driver();
 
     void clear();
+    void display_on();
+    void display_off();
+    void cursor_on();
+    void cursor_off();
+    void cursor_blink_on();
+    void cursor_blink_off();
     void putchar(char character);
     void print (const char * string);
     void cursor_pos(uint8_t row, uint8_t column);
@@ -46,6 +52,9 @@ class LCD_driver
     void _write_lower_nibble(uint8_t data_byte);
     void _write_upper_nibble(uint8_t data_byte);
     uint8_t _check_busy();
+
+    uint8_t _cursor_state;
+    uint8_t _display_state;
 };
 
 #endif

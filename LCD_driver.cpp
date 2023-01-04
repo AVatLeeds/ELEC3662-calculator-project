@@ -43,6 +43,9 @@ LCD_driver::LCD_driver()
     PORTC->PCTL &= ~0xFFFF0000;
     PORTC->DEN |= 0xF0;
 
+    _cursor_state = CURSOR_ON | CURSOR_BLINK;
+    _display_state = DISPLAY_ON;
+
     RS = LOW;
     delay_us(15000); // delay ~15 ms
     _write_upper_nibble(MODE_8BIT);
@@ -54,7 +57,7 @@ LCD_driver::LCD_driver()
     _command(FUNCTION_SET | MODE_4BIT | TWO_LINE);
     _command(DISPLAY_SETUP);
     _command(LCD_CLEAR);
-    _command(DISPLAY_SETUP | DISPLAY_ON | CURSOR_ON); //| CURSOR_BLINK);
+    _command(DISPLAY_SETUP | _display_state | _cursor_state);
     _command(ENTRY_MODE | INCREMENT_CURSOR);
 }
 
@@ -117,6 +120,42 @@ void LCD_driver::_command(uint8_t data_byte)
 
 void LCD_driver::clear(void) {
     _command(LCD_CLEAR);
+}
+
+void LCD_driver::display_on()
+{
+    _display_state |= DISPLAY_ON;
+    _command(DISPLAY_SETUP | _display_state | _cursor_state);
+}
+
+void LCD_driver::display_off()
+{
+    _display_state &= ~DISPLAY_ON;
+    _command(DISPLAY_SETUP | _display_state | _cursor_state);
+}
+
+void LCD_driver::cursor_on()
+{
+    _cursor_state |= CURSOR_ON;
+    _command(DISPLAY_SETUP | _display_state | _cursor_state);
+}
+
+void LCD_driver::cursor_off()
+{
+    _cursor_state &= ~CURSOR_ON;
+    _command(DISPLAY_SETUP | _display_state | _cursor_state);
+}
+
+void LCD_driver::cursor_blink_on()
+{
+    _cursor_state |= CURSOR_BLINK;
+    _command(DISPLAY_SETUP | _display_state | _cursor_state);
+}
+
+void LCD_driver::cursor_blink_off()
+{
+    _cursor_state &= ~CURSOR_BLINK;
+    _command(DISPLAY_SETUP | _display_state | _cursor_state);
 }
 
 void LCD_driver::putchar(char character) {
