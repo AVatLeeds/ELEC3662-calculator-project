@@ -35,6 +35,12 @@ void Calculator::buffer_insert(char character)
 
 void Calculator::buffer_insert_operator(enum op op)
 {
+    if (_computed)
+    {
+        _computed = false;
+        buffer_clear();
+    }
+
     switch (op)
     {
         case PLUS:
@@ -58,7 +64,7 @@ void Calculator::buffer_insert_text(const char * text)
     }
 
     unsigned int length = 0;
-    while (text[length ++]);
+    while (text[length]) length ++;
     if (_pos < _head)
     {
         for (uint16_t i = _head + length - 1; i > _pos; _expression_buffer[i] = _expression_buffer[i - length], i --); 
