@@ -56,8 +56,8 @@ int main(void)
 
             case 0x1100: pressed ? : (calc.buffer_insert_text("ANS"), pressed = 1); break;
 
-            case 0x1040: pressed ? : (pressed = 1); break;
-            case 0x1004: pressed ? : (pressed = 1); break;
+            case 0x1040: pressed ? : (calc.history_back(), pressed = 1); break;
+            case 0x1004: pressed ? : (calc.history_forward(), pressed = 1); break;
 
             case 0x0100: pressed ? : (calc.toggle_sign(), pressed = 1); break;
             case 0x1010:

@@ -1,3 +1,4 @@
+#include <cstring>
 #include <stdint.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -16,7 +17,23 @@ Calculator::Calculator() : _LCD()
 
 void Calculator::buffer_insert(char character)
 {
-    if (computed) buffer_clear(), computed = false;
+    if (_computed)
+    {
+        _computed = false;
+        buffer_clear();
+    }
+
+    switch (character)
+    {
+        case '+':
+        case '-':
+        case 'x':
+        case 0xFD:
+        case '^': 
+        if (_pos == 0) buffer_insert_text("ANS");
+        break;
+    }
+
     if (_pos < _head)
     {
         for (uint16_t i = _head; i > _pos; _expression_buffer[i] = _expression_buffer[i - 1], i --); 
@@ -30,7 +47,12 @@ void Calculator::buffer_insert(char character)
 
 void Calculator::buffer_insert_text(const char * text)
 {
-    if (computed) buffer_clear(), computed = false;
+    if (_computed)
+    {
+        _computed = false;
+        buffer_clear();
+    }
+
     unsigned int length = 0;
     while (text[length ++]);
     if (_pos < _head)
@@ -50,7 +72,7 @@ void Calculator::buffer_insert_text(const char * text)
 
 void Calculator::buffer_backspace()
 {
-    computed = false;
+    _computed = false;
     if (_pos)
     {
         _pos--;
@@ -79,7 +101,7 @@ void Calculator::buffer_clear()
 
 void Calculator::cursor_left()
 {
-    computed = false;
+    _computed = false;
     if (_pos)
     {
         _pos --;
@@ -94,7 +116,7 @@ void Calculator::cursor_left()
 
 void Calculator::cursor_right()
 {
-    computed = false;
+    _computed = false;
     if (_pos < _head)
     {
         _pos ++;
@@ -103,6 +125,56 @@ void Calculator::cursor_right()
             _window_start ++;
             buffer_redisplay();
         }
+        _LCD.cursor_pos(0, _pos - _window_start);
+    }
+}
+
+void Calculator::history_back()
+{
+    _window_start = 0;
+    _head = 0;
+
+    if (_computed) _hist_idx = _hist_head;
+
+    if (!_hist_overflow || _hist_head == (HISTORY_LENGTH - 1))
+    {
+        _hist_idx = (_hist_idx > 0) ? _hist_idx - 1 : 0;
+    }
+    else
+    {
+        _hist_idx = (_hist_idx == 0) ? HISTORY_LENGTH - 1 : _hist_idx - ((_hist_idx == (_hist_head + 1)) ? 0 : 1); 
+    }
+
+    while ((_expression_buffer[_head] = _expression_history[_hist_idx][_head])) _head ++;
+
+    if (_head > _window_length) _window_start = _head - (_window_length - 1);
+    buffer_redisplay();
+    _pos = _head;
+    _LCD.cursor_pos(0, _pos - _window_start);
+    _computed = false;
+}
+
+void Calculator::history_forward()
+{
+    _window_start = 0;
+    _head = 0;
+
+    if (!_computed)
+    {
+        if (!_hist_overflow)
+        {
+            _hist_idx = (_hist_idx < _hist_head) ? _hist_idx + 1 : _hist_head;
+        }
+        else
+        {
+            _hist_idx = (_hist_idx == (HISTORY_LENGTH - 1)) ? 0 : _hist_idx + ((_hist_idx == _hist_head) ? 0 : 1);
+        }
+
+        while ((_expression_buffer[_head] = _expression_history[_hist_idx][_head])) _head ++;
+
+        if (_head > _window_length) _window_start = _head - (_window_length - 1);
+        buffer_redisplay();
+        _pos = _head;
         _LCD.cursor_pos(0, _pos - _window_start);
     }
 }
@@ -168,12 +240,27 @@ void Calculator::toggle_sign()
 
 void Calculator::evaluate()
 {
-    _expression_buffer[_head] = '\0';
     clear_result();
+
+    if (_head == 0)
+    {
+        _LCD.print("Empty expression");
+        return;
+    }
+
+    _expression_buffer[_head] = '\0';
     if (parser(_expression_buffer, _result)) display_result();
     else _LCD.print("Bad expression");
-    computed = true;
-    _pos = _head;
+    _computed = true;
+
+    if (strcmp(_expression_buffer, _expression_history[_hist_idx]))
+    {
+        uint8_t i = 0;
+        _hist_idx = _hist_head;
+        while ((_expression_history[_hist_idx][i] = _expression_buffer[i])) i ++;
+        _hist_head = (_hist_head == (HISTORY_LENGTH - 1)) ? _hist_overflow = true, 0 : _hist_head + 1;
+        _expression_history[_hist_head][0] = '\0';
+    }
 }
 
 void Calculator::clear_result()
