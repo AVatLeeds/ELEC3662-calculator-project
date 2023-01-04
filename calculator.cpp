@@ -77,6 +77,7 @@ void Calculator::buffer_insert_text(const char * text)
 void Calculator::buffer_backspace()
 {
     _computed = false;
+
     if (_pos)
     {
         _pos--;
@@ -89,9 +90,9 @@ void Calculator::buffer_backspace()
         {
             _window_start --;
         }
-        buffer_redisplay();
-        _LCD.cursor_pos(0, _pos - _window_start);
-    } 
+    }
+    buffer_redisplay();
+    _LCD.cursor_pos(0, _pos - _window_start);
 }
 
 void Calculator::buffer_clear()

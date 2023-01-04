@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "SYSTICK.h"
 #include "calculator.h"
 #include "status.h"
 #include "LCD_driver.h"
@@ -24,54 +25,79 @@ int main(void)
 {   
     status = WHITE;
     //LCD.print("Hello Oti :)");
+    uint32_t clear_counter = 0;
     uint8_t pressed = 0;
 
     while (1)
     {
         //keypad_state_test();
         uint32_t keypress = keypad.value();
-        switch (keypress)
+        if (!pressed)
         {
-            case 0x8000: pressed ? : (calc.buffer_insert('1'), pressed = 1); break;
-            case 0x4000: pressed ? : (calc.buffer_insert('2'), pressed = 1); break;
-            case 0x2000: pressed ? : (calc.buffer_insert('3'), pressed = 1); break;
-            case 0x0800: pressed ? : (calc.buffer_insert('4'), pressed = 1); break;
-            case 0x0400: pressed ? : (calc.buffer_insert('5'), pressed = 1); break;
-            case 0x0200: pressed ? : (calc.buffer_insert('6'), pressed = 1); break;
-            case 0x0080: pressed ? : (calc.buffer_insert('7'), pressed = 1); break;
-            case 0x0040: pressed ? : (calc.buffer_insert('8'), pressed = 1); break;
-            case 0x0020: pressed ? : (calc.buffer_insert('9'), pressed = 1); break;
-            case 0x0008: pressed ? : (calc.buffer_insert('.'), pressed = 1); break;
-            case 0x0004: pressed ? : (calc.buffer_insert('0'), pressed = 1); break;
-            case 0x0002: pressed ? : (calc.buffer_insert('E'), pressed = 1); break;
+            switch (keypress)
+            {
+                case 0x8000: calc.buffer_insert('1'); pressed = 1; break;
+                case 0x4000: calc.buffer_insert('2'); pressed = 1; break;
+                case 0x2000: calc.buffer_insert('3'); pressed = 1; break;
+                case 0x0800: calc.buffer_insert('4'); pressed = 1; break;
+                case 0x0400: calc.buffer_insert('5'); pressed = 1; break;
+                case 0x0200: calc.buffer_insert('6'); pressed = 1; break;
+                case 0x0080: calc.buffer_insert('7'); pressed = 1; break;
+                case 0x0040: calc.buffer_insert('8'); pressed = 1; break;
+                case 0x0020: calc.buffer_insert('9'); pressed = 1; break;
+                case 0x0008: calc.buffer_insert('.'); pressed = 1; break;
+                case 0x0004: calc.buffer_insert('0'); pressed = 1; break;
+                case 0x0002: calc.buffer_insert('E'); pressed = 1; break;
 
-            case 0x9000: pressed ? : (calc.buffer_insert_operator(POWER), pressed = 1); break;
-            case 0x5000: pressed ? : (calc.buffer_insert_operator(MULTIPLY), pressed = 1); break;
-            case 0x3000: pressed ? : (calc.buffer_insert_operator(PLUS), pressed = 1); break;
-            case 0x1800: pressed ? : (calc.buffer_insert_operator(ROOT), pressed = 1); break;
-            case 0x1400: pressed ? : (calc.buffer_insert_operator(DIVIDE), pressed = 1); break;
-            case 0x1200: pressed ? : (calc.buffer_insert_operator(MINUS), pressed = 1); break;
-            case 0x1080: pressed ? : (calc.buffer_insert('('), pressed = 1); break;
-            case 0x1020: pressed ? : (calc.buffer_insert(')'), pressed = 1); break;
+                case 0x9000: calc.buffer_insert_operator(POWER);    pressed = 1; break;
+                case 0x5000: calc.buffer_insert_operator(MULTIPLY); pressed = 1; break;
+                case 0x3000: calc.buffer_insert_operator(PLUS);     pressed = 1; break;
+                case 0x1800: calc.buffer_insert_operator(ROOT);     pressed = 1; break;
+                case 0x1400: calc.buffer_insert_operator(DIVIDE);   pressed = 1; break;
+                case 0x1200: calc.buffer_insert_operator(MINUS);    pressed = 1; break;
+                case 0x1080: calc.buffer_insert('(');       pressed = 1; break;
+                case 0x1020: calc.buffer_insert(')');       pressed = 1; break;
 
-            case 0x1100: pressed ? : (calc.buffer_insert_text("ANS"), pressed = 1); break;
+                case 0x1100: calc.buffer_insert_text("ANS");    pressed = 1; break;
 
-            case 0x1040: pressed ? : (calc.history_back(), pressed = 1); break;
-            case 0x1004: pressed ? : (calc.history_forward(), pressed = 1); break;
+                case 0x1040: calc.history_back();       pressed = 1; break;
+                case 0x1004: calc.history_forward();    pressed = 1; break;
 
-            case 0x0100: pressed ? : (calc.toggle_sign(), pressed = 1); break;
-            case 0x1010:
-            case 0x0010: pressed ? : (calc.buffer_backspace(), pressed = 1); break; 
-            case 0x1001:
-            case 0x0001: pressed ? : (calc.evaluate(), pressed = 1); break;
+                case 0x0100: calc.toggle_sign();        pressed = 1; break;
+                case 0x1010:
+                case 0x0010: calc.buffer_backspace();   pressed = 1; break; 
+                case 0x1001:
+                case 0x0001: calc.evaluate();           pressed = 1; break;
 
-            case 0x1008: pressed ? : (calc.cursor_left(), pressed = 1); break;
-            case 0x1002: pressed ? : (calc.cursor_right(), pressed = 1); break;
-            
-            case 0x1000:
-            case 0x0000: pressed = 0; break;
+                case 0x1008: calc.cursor_left();    pressed = 1; break;
+                case 0x1002: calc.cursor_right();   pressed = 1; break;
 
-            default: break;             
+                default: break;             
+            }
+        }
+        else
+        {
+            delay_us(1); // delay is not accurate !!
+            switch (keypress)
+            {
+                case 0x0010:
+                if (clear_counter >= 20000) // should be 2000000 if delay were actually 1us
+                {
+                    calc.buffer_clear();
+                    clear_counter = 0;
+                    break;
+                }
+                else
+                {
+                    clear_counter ++;
+                    break;
+                }
+
+                case 0x1000:
+                case 0x0000: clear_counter = 0; pressed = 0; break;
+
+                default: break;
+            }
         }
     }
 }
