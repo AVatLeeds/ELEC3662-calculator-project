@@ -10,6 +10,49 @@ LCD_driver LCD;
 Keypad keypad;
 Calculator calc;
 
+void logo_display()
+{
+    char * block_row = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
+    uint8_t idx = 0;
+    char * logo_text_1 = "AV-calc         ";
+    char * logo_text_2 = "         ver:0.1";
+
+    LCD.cursor_blink_off();
+    LCD.cursor_off();
+
+    LCD.cursor_pos(0, 0);
+    LCD.print(block_row);
+    LCD.cursor_pos(1, 0);
+    LCD.print(block_row);
+
+    delay_us(50000000);
+    delay_us(50000000);
+    delay_us(50000000);
+    delay_us(50000000);
+    delay_us(50000000);
+    delay_us(50000000);
+
+    while (idx < 16)
+    {
+        LCD.cursor_pos(0, idx);
+        LCD.putchar(logo_text_1[idx]);
+        LCD.cursor_pos(1, 15 - idx);
+        LCD.putchar(logo_text_2[15 - idx]);
+        delay_us(100000);
+        idx ++;
+    }
+    
+    delay_us(50000000);
+    delay_us(50000000);
+    delay_us(50000000);
+    delay_us(50000000);
+
+    LCD.clear();
+
+    LCD.cursor_pos(0, 0);
+    LCD.cursor_on();
+}
+
 void keypad_state_test()
 {
     LCD.cursor_pos(1, 0);
@@ -27,6 +70,8 @@ int main(void)
     //LCD.print("Hello Oti :)");
     uint32_t clear_counter = 0;
     uint8_t pressed = 0;
+
+    logo_display();
 
     while (1)
     {
