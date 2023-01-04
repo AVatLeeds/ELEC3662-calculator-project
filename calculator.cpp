@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <cmath>
 #include "calculator.h"
-#include "recursive_descent.h"
 
 #define emax    1023
 #define emin    -1022
@@ -23,17 +22,6 @@ void Calculator::buffer_insert(char character)
         buffer_clear();
     }
 
-    switch (character)
-    {
-        case '+':
-        case '-':
-        case 'x':
-        case 0xFD:
-        case '^': 
-        if (_pos == 0) buffer_insert_text("ANS");
-        break;
-    }
-
     if (_pos < _head)
     {
         for (uint16_t i = _head; i > _pos; _expression_buffer[i] = _expression_buffer[i - 1], i --); 
@@ -43,6 +31,22 @@ void Calculator::buffer_insert(char character)
     _window_start += 1 & (_pos == (_window_start + _window_length));
     buffer_redisplay();
     _LCD.cursor_pos(0, _pos - _window_start);
+}
+
+void Calculator::buffer_insert_operator(enum op op)
+{
+    switch (op)
+    {
+        case PLUS:
+        case MINUS:
+        case MULTIPLY:
+        case DIVIDE:
+        case POWER: 
+        if (_pos == 0) buffer_insert_text("ANS");
+        break;
+    }
+
+    buffer_insert(op);
 }
 
 void Calculator::buffer_insert_text(const char * text)
@@ -209,7 +213,7 @@ void Calculator::toggle_sign()
 
     if (_pos == 0)
     {
-        if (_expression_buffer[_pos] == '-')
+        if (_expression_buffer[_pos] == MINUS)
         {
             cursor_right();
             buffer_backspace();
@@ -217,11 +221,11 @@ void Calculator::toggle_sign()
         }
         else
         {
-            buffer_insert('-');
+            buffer_insert(MINUS);
             save_pos ++;
         }
     }
-    else if (_expression_buffer[_pos] == '-' && !isdigit(_expression_buffer[_pos - 1]))
+    else if (_expression_buffer[_pos] == MINUS && !isdigit(_expression_buffer[_pos - 1]))
     {
         cursor_right();
         buffer_backspace();
@@ -230,7 +234,7 @@ void Calculator::toggle_sign()
     else if (_pos != save_pos)
     {
         cursor_right();
-        buffer_insert('-');
+        buffer_insert(MINUS);
         save_pos ++;
     }
 
@@ -334,7 +338,7 @@ void Calculator::display_result()
         }
         int integer = (int)round((decimal_value * pow(10, number_length - 1)));
 
-        _LCD.putchar(S ? '-' : '+');
+        _LCD.putchar(S ? MINUS : PLUS);
         text_idx = number_length + 1;
         number_text[text_idx --] = '\0';
         while (fraction_digits --)
@@ -352,7 +356,7 @@ void Calculator::display_result()
         _LCD.print(number_text);
         _LCD.putchar(' ');
         _LCD.putchar('E');
-        _LCD.putchar((decimal_exponent < 0) ? '-' : '+');
+        _LCD.putchar((decimal_exponent < 0) ? MINUS : PLUS);
         decimal_exponent *= (decimal_exponent < 0) ? -1 : 1;
         
         text_idx = 3;

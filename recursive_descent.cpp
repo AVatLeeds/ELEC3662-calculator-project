@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cmath>
+#include "recursive_descent.h"
 
 double last_result;
 
@@ -49,7 +50,7 @@ int parse_factor(char * &source_text, double &result)
 int parse_power(char * &source_text, double &result)
 {
     double temp;
-    if (*source_text == (char)0xE8) // square root character
+    if (*source_text == (char)ROOT) // square root character
     {
         source_text ++;
         if (parse_factor(source_text, result))
@@ -61,7 +62,7 @@ int parse_power(char * &source_text, double &result)
     }
     else if (parse_factor(source_text, result))
     {
-        while (*source_text == '^')
+        while (*source_text == POWER)
         {
             source_text ++;
             if (parse_factor(source_text, temp)) result = pow(result, temp);
@@ -77,17 +78,17 @@ int parse_term(char * &source_text, double &result)
     double temp;
     if (parse_power(source_text, result))
     {
-        while (*source_text == 'x' || *source_text == (char)0xFD) // 0xFD is the value of the divide character on the LCD display
+        while (*source_text == MULTIPLY || *source_text == (char)DIVIDE)
         {
             switch (*source_text)
             {
-                case 'x':
+                case MULTIPLY:
                 source_text ++;
                 if (parse_power(source_text, temp)) result *= temp;
                 else return 0;
                 break;
 
-                case 0xFD: // 0xFD is the value of the divide character on the LCD display
+                case DIVIDE:
                 source_text ++;
                 if (parse_power(source_text, temp)) result /= temp;
                 else return 0;
@@ -104,17 +105,17 @@ int parse_expression(char * &source_text, double &result)
     double temp;
     if (parse_term(source_text, result))
     {
-        while (*source_text == '+' || *source_text == '-')
+        while (*source_text == PLUS || *source_text == MINUS)
         {
             switch (*source_text)
             {
-                case '+':
+                case PLUS:
                 source_text ++;
                 if (parse_term(source_text, temp)) result += temp;
                 else return 0;
                 break;
 
-                case '-':
+                case MINUS:
                 source_text ++;
                 if (parse_term(source_text, temp)) result -= temp;
                 else return 0;

@@ -1,10 +1,11 @@
 #ifndef CALCULATOR_H
 #define CALCULATOR_H
 
-#define HISTORY_LENGTH  16
-
 #include <stdint.h>
 #include "LCD_driver.h"
+#include "recursive_descent.h"
+
+#define HISTORY_LENGTH  16
 
 class Calculator
 {
@@ -13,6 +14,7 @@ class Calculator
     Calculator();
 
     void buffer_insert(char character);
+    void buffer_insert_operator(enum op op);
     void buffer_insert_text(const char * text);
     void toggle_sign();
     void cursor_left();

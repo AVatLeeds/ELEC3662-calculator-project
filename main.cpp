@@ -45,12 +45,12 @@ int main(void)
             case 0x0004: pressed ? : (calc.buffer_insert('0'), pressed = 1); break;
             case 0x0002: pressed ? : (calc.buffer_insert('E'), pressed = 1); break;
 
-            case 0x9000: pressed ? : (calc.buffer_insert('^'), pressed = 1); break;
-            case 0x5000: pressed ? : (calc.buffer_insert('x'), pressed = 1); break;
-            case 0x3000: pressed ? : (calc.buffer_insert('+'), pressed = 1); break;
-            case 0x1800: pressed ? : (calc.buffer_insert(0xE8), pressed = 1); break;
-            case 0x1400: pressed ? : (calc.buffer_insert(0xFD), pressed = 1); break;
-            case 0x1200: pressed ? : (calc.buffer_insert('-'), pressed = 1); break;
+            case 0x9000: pressed ? : (calc.buffer_insert_operator(POWER), pressed = 1); break;
+            case 0x5000: pressed ? : (calc.buffer_insert_operator(MULTIPLY), pressed = 1); break;
+            case 0x3000: pressed ? : (calc.buffer_insert_operator(PLUS), pressed = 1); break;
+            case 0x1800: pressed ? : (calc.buffer_insert_operator(ROOT), pressed = 1); break;
+            case 0x1400: pressed ? : (calc.buffer_insert_operator(DIVIDE), pressed = 1); break;
+            case 0x1200: pressed ? : (calc.buffer_insert_operator(MINUS), pressed = 1); break;
             case 0x1080: pressed ? : (calc.buffer_insert('('), pressed = 1); break;
             case 0x1020: pressed ? : (calc.buffer_insert(')'), pressed = 1); break;
 
