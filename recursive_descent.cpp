@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 #include "recursive_descent.h"
 
 # define M_PI		3.14159265358979323846
+# define M_E		2.7182818284590452354
 
 double last_result;
 
@@ -117,6 +119,18 @@ int parse_factor(char * &source_text, double &result)
         source_text += 3;
         return 1;
     }
+    else if (*source_text == '\xF7')
+    {
+        result = M_PI;
+        source_text ++;
+        return 1;
+    }
+    else if (*source_text == 'e')
+    {
+        result = M_E;
+        source_text ++;
+        return 1;
+    }
     return 0;
 }
 
@@ -192,6 +206,24 @@ int parse_special(char * &source_text, double &result)
         if (parse_factor(source_text, temp))
         {
             result = temp * (M_PI / 180);
+            return 1;
+        }
+    }
+    else if (!strncmp(source_text, "ln", 2))
+    {
+        source_text += 2;
+        if (parse_factor(source_text, temp))
+        {
+            result = log(temp);
+            return 1;
+        }
+    }
+    else if (!strncmp(source_text, "log10", 5))
+    {
+        source_text += 5;
+        if (parse_factor(source_text, temp))
+        {
+            result = log10(temp);
             return 1;
         }
     }

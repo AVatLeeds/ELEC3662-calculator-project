@@ -122,6 +122,10 @@ int main(void)
                         case 0x0300: calc.buffer_insert_text("atan(");  pressed = 1; on_release = 0; break;
                         case 0x0180: calc.buffer_insert_text("deg(");  pressed = 1; on_release = 0; break;
                         case 0x0120: calc.buffer_insert_text("rad(");  pressed = 1; on_release = 0; break;
+                        case 0x0108: calc.buffer_insert_text("ln(");  pressed = 1; on_release = 0; break;
+                        case 0x0102: calc.buffer_insert_text("log10(");  pressed = 1; on_release = 0; break;
+                        case 0x0140: calc.buffer_insert('\xF7');  pressed = 1; on_release = 0; break;
+                        case 0x0104: calc.buffer_insert('e');  pressed = 1; on_release = 0; break;
 
                         case 0x0100:
                         case 0x0000: break;
