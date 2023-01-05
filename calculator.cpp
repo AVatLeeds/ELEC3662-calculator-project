@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <cmath>
 #include "calculator.h"
+#include "recursive_descent.h"
 
 #define emax    1023
 #define emin    -1022
@@ -75,7 +76,7 @@ void Calculator::buffer_insert_text(const char * text)
         _expression_buffer[_pos ++] = text[length ++];
     }
     _head += length;
-    if (_pos == (_window_start + _window_length)) _window_start += length;
+    if (_pos >= (_window_start + _window_length)) _window_start += length;
     buffer_redisplay();
     _LCD.cursor_pos(0, _pos - _window_start);
 }
@@ -209,9 +210,8 @@ void Calculator::buffer_redisplay()
 
 void Calculator::toggle_sign()
 {
-    uint16_t save_pos;
-
-    save_pos = _pos;
+    uint8_t saved_pos = _pos;
+    uint8_t saved_win_start = _window_start;
 
     while ((isdigit(_expression_buffer[_pos]) || _pos == _head) && _pos)
     {
@@ -224,44 +224,64 @@ void Calculator::toggle_sign()
         {
             cursor_right();
             buffer_backspace();
-            if (save_pos) save_pos --;
+            if (saved_pos) saved_pos --;
         }
         else
         {
             buffer_insert(MINUS);
-            save_pos ++;
+            saved_pos ++;
         }
     }
     else if (_expression_buffer[_pos] == MINUS && !isdigit(_expression_buffer[_pos - 1]))
     {
         cursor_right();
         buffer_backspace();
-        if (save_pos - _pos) save_pos --;
+        if (saved_pos - _pos) saved_pos --;
     }
-    else if (_pos != save_pos)
+    else if (_expression_buffer[_pos] == '(')
+    {
+        if (_expression_buffer[_pos - 1] == MINUS)
+        {
+            buffer_backspace();
+            if (saved_pos) saved_pos --;
+        }
+        else
+        {
+            buffer_insert(MINUS);
+            saved_pos ++;
+        }
+    }
+    else if (_pos != saved_pos)
     {
         cursor_right();
         buffer_insert(MINUS);
-        save_pos ++;
+        saved_pos ++;
     }
 
-    _pos = save_pos;
-    _LCD.cursor_pos(0, _pos);
+    _pos = saved_pos;
+    _window_start = saved_win_start;
+    if (_pos == (_window_start + _window_length)) _window_start ++;
+    buffer_redisplay();
+    _LCD.cursor_pos(0, _pos - _window_start);
 }
 
 void Calculator::evaluate()
 {
     clear_result();
 
-    if (_head == 0)
-    {
-        _LCD.print("Empty expression");
-        return;
-    }
-
     _expression_buffer[_head] = '\0';
-    if (parser(_expression_buffer, _result)) display_result();
-    else _LCD.print("Bad expression");
+    switch (parser(_expression_buffer, _result))
+    {
+        case SUCCESS:       display_result(); break;
+        case EXPR_EMPTY:    _LCD.print("Err: Empty      "); break;
+        case MAL_EXPR:      _LCD.print("Err: Expression "); break;
+        case MAL_NUM:       _LCD.print("Err: Number     "); break;
+        case TRIG_ERR:      _LCD.print("Err: trig       "); break;
+        case LOG_ERR:       _LCD.print("Err: Logarithm  "); break;
+        case POW_ERR:       _LCD.print("Err: Power      "); break;
+        case SQRT_ERR:      _LCD.print("Err: Square root"); break;
+        case E_ERR:         _LCD.print("Err: Exponent   "); break;
+    }
     _pos = _head;
     _computed = true;
 

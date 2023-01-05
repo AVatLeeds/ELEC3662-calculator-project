@@ -10,6 +10,7 @@
 # define M_PI		3.14159265358979323846
 # define M_E		2.7182818284590452354
 
+enum error state;
 double last_result;
 
 int parse_number(char * &source_text, double &result);
@@ -22,7 +23,7 @@ int parse_number(char * &source_text, double &result)
     int8_t sign = 1;
     int8_t exponent_sign = 1;
     double fractional_part = 0;
-    uint32_t exponent = 0;
+    double exponent = 0;
     char * marker;
 
     result = 0.0;
@@ -58,14 +59,16 @@ int parse_number(char * &source_text, double &result)
                     if (isdigit(*source_text))
                     {
                         while (isdigit(*source_text)) exponent = exponent * 10 + (*source_text ++ - '0');
-                        result *= pow(10, (double)exponent * exponent_sign) * sign;
-                        return 1;
+                        exponent *= exponent_sign;
+                        if (exponent <= 308 && exponent >= -323) result *= pow(10, exponent) * sign;
+                        else return state = E_ERR;
+                        return state = SUCCESS;
                     }
                 }
                 else
                 {
                     result *= sign;
-                    return 1;
+                    return SUCCESS;
                 }
             }
         }
@@ -81,35 +84,37 @@ int parse_number(char * &source_text, double &result)
             if (isdigit(*source_text))
             {
                 while (isdigit(*source_text)) exponent = exponent * 10 + (*source_text ++ - '0');
-                result *= pow(10, (double)exponent * exponent_sign) * sign;
-                return 1;
+                exponent *= exponent_sign;
+                if (exponent <= 308 && exponent >= -323) result *= pow(10, exponent) * sign;
+                else return state = E_ERR;
+                return SUCCESS;
             }
         }
         else
         {
             result *= sign;
-            return 1;
+            return SUCCESS;
         }
     }
 
-    return 0;
+    return state = MAL_NUM;
 }
 
 int parse_factor(char * &source_text, double &result)
 {
-    if (parse_number(source_text, result))
+    if (!parse_number(source_text, result))
     {
-        return 1;
+        return SUCCESS;
     }
     else if (*source_text == '(')
     {
         source_text ++;
-        if (parse_expression(source_text, result))
+        if (!parse_expression(source_text, result))
         {
             if (*source_text == ')')
             {
                 source_text ++;
-                return 1;
+                return SUCCESS;
             }
         }
     }
@@ -117,21 +122,23 @@ int parse_factor(char * &source_text, double &result)
     {
         result = last_result;
         source_text += 3;
-        return 1;
+        return SUCCESS;
     }
     else if (*source_text == '\xF7')
     {
         result = M_PI;
         source_text ++;
-        return 1;
+        return SUCCESS;
     }
     else if (*source_text == 'e')
     {
         result = M_E;
         source_text ++;
-        return 1;
+        return SUCCESS;
     }
-    return 0;
+    
+    if (state) return state;
+    return state = MAL_EXPR;
 }
 
 int parse_special(char * &source_text, double &result)
@@ -140,98 +147,105 @@ int parse_special(char * &source_text, double &result)
     if (!strncmp(source_text, "sin", 3))
     {
         source_text += 3;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
             result = sin(temp);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "cos", 3))
     {
         source_text += 3;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
             result = cos(temp);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "tan", 3))
     {
         source_text += 3;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
             result = tan(temp);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "asin", 3))
     {
         source_text += 4;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
+            if (temp < -1 || temp > 1) return state = TRIG_ERR;
             result = asin(temp);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "acos", 3))
     {
         source_text += 4;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
+            if (temp < -1 || temp > 1) return state = TRIG_ERR;
             result = acos(temp);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "atan", 3))
     {
         source_text += 4;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
+            if (temp < -1 || temp > 1) return state = TRIG_ERR;
             result = atan(temp);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "deg", 3))
     {
         source_text += 3;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
             result = temp * (180 / M_PI);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "rad", 3))
     {
         source_text += 3;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
             result = temp * (M_PI / 180);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "ln", 2))
     {
         source_text += 2;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
+            if (temp <= 0) return state = LOG_ERR;
             result = log(temp);
-            return 1;
+            return SUCCESS;
         }
     }
     else if (!strncmp(source_text, "log10", 5))
     {
         source_text += 5;
-        if (parse_factor(source_text, temp))
+        if (!parse_factor(source_text, temp))
         {
+            if (temp <= 0) return state = LOG_ERR;
             result = log10(temp);
-            return 1;
+            return SUCCESS;
         }
     }
-    else if (parse_factor(source_text, result))
+    else if (!parse_factor(source_text, result))
     {
-        return 1;
+        return SUCCESS;
     }
-    return 0;
+
+    if (state) return state;
+    return state = MAL_EXPR;
 }
 
 int parse_power(char * &source_text, double &result)
@@ -240,30 +254,43 @@ int parse_power(char * &source_text, double &result)
     if (*source_text == (char)ROOT) // square root character
     {
         source_text ++;
-        if (parse_special(source_text, result))
+        if (!parse_special(source_text, result))
         {
+            if (result < 0) return state = SQRT_ERR;
             result = sqrt(result);
-            return 1;
+            return SUCCESS;
         }
-        else return 0;
+        else if (state) return state;
+        return state = MAL_EXPR;
     }
-    else if (parse_special(source_text, result))
+    else if (!parse_special(source_text, result))
     {
         while (*source_text == POWER)
         {
             source_text ++;
-            if (parse_special(source_text, temp)) result = pow(result, temp);
-            else return 0;
+            if (!parse_special(source_text, temp))
+            {
+                if (result == 0 && temp < 0) result = 1.0 / pow(result, temp * -1.0);
+                else if (result < 0 && (temp < 1 && temp > -1)) return state = POW_ERR;
+                else result = pow(result, temp);
+            }
+            else
+            {
+                if (state) return state;
+                return state = MAL_EXPR;
+            }
         }
-        return 1;
+        return SUCCESS;
     }
-    return 0;
+
+    if (state) return state;
+    return state = MAL_EXPR;
 }
 
 int parse_term(char * &source_text, double &result)
 {
     double temp;
-    if (parse_power(source_text, result))
+    if (!parse_power(source_text, result))
     {
         while (*source_text == MULTIPLY || *source_text == (char)DIVIDE)
         {
@@ -271,26 +298,30 @@ int parse_term(char * &source_text, double &result)
             {
                 case MULTIPLY:
                 source_text ++;
-                if (parse_power(source_text, temp)) result *= temp;
-                else return 0;
+                if (!parse_power(source_text, temp)) result *= temp;
+                else if (state) return state;
+                else return state = MAL_EXPR;
                 break;
 
                 case DIVIDE:
                 source_text ++;
-                if (parse_power(source_text, temp)) result /= temp;
-                else return 0;
+                if (!parse_power(source_text, temp)) result /= temp;
+                else if (state) return state;
+                else return state = MAL_EXPR;
                 break;
             }
         }
-        return 1;
+        return SUCCESS;
     }
-    return 0;
+
+    if (state) return state;
+    return state = MAL_EXPR;
 }
 
 int parse_expression(char * &source_text, double &result)
 {
     double temp;
-    if (parse_term(source_text, result))
+    if (!parse_term(source_text, result))
     {
         while (*source_text == PLUS || *source_text == MINUS)
         {
@@ -298,28 +329,33 @@ int parse_expression(char * &source_text, double &result)
             {
                 case PLUS:
                 source_text ++;
-                if (parse_term(source_text, temp)) result += temp;
-                else return 0;
+                if (!parse_term(source_text, temp)) result += temp;
+                else if (state) return state;
+                else return state = MAL_EXPR;
                 break;
 
                 case MINUS:
                 source_text ++;
-                if (parse_term(source_text, temp)) result -= temp;
-                else return 0;
+                if (!parse_term(source_text, temp)) result -= temp;
+                else if (state) return state;
+                else return state = MAL_EXPR;
                 break;
             }
         }
-        return 1;
+        return SUCCESS;
     }
-    return 0;
+    
+    if (state) return state;
+    return state = MAL_EXPR;
 }
 
-int parser(char * source_text, double &result)
+enum error parser(char * source_text, double &result)
 {
     last_result = result;
-    if (parse_expression(source_text, result))
+    if (*source_text == '\0') return EXPR_EMPTY;
+    else if (!parse_expression(source_text, result))
     {
-        if (*source_text == '\0') return 1;
+        if (*source_text == '\0') return SUCCESS;
     }
-    return 0;
+    return state;
 }
