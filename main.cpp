@@ -12,10 +12,10 @@ Calculator calc;
 
 void logo_display()
 {
-    char * block_row = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
+    const char * block_row = "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF";
     uint8_t idx = 0;
-    char * logo_text_1 = "AV-calc         ";
-    char * logo_text_2 = "         ver:0.1";
+    const char * logo_text_1 = "AV-calc         ";
+    const char * logo_text_2 = "         ver:0.1";
 
     LCD.cursor_blink_off();
     LCD.cursor_off();

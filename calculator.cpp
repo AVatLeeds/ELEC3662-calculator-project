@@ -51,6 +51,8 @@ void Calculator::buffer_insert_operator(enum op op)
         case POWER: 
         if (_pos == 0) buffer_insert_text("ANS");
         break;
+
+        default: break;
     }
 
     buffer_insert(op);

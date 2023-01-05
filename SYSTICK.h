@@ -16,7 +16,7 @@ static inline void systick_delay(const uint32_t count)
     STRELOAD = count - 1;
     //STCURRENT = 0x0; //writing to this register clears it and starts the counter again from the value in the reload register
     STCTRL |= 0x1;
-    while (STCURRENT);
+    while (!(STCTRL & (1U << 16)));
     STCTRL &= ~0x1;
 }
 
