@@ -102,6 +102,29 @@ int parse_number(char * &source_text, double &result)
 
 int parse_factor(char * &source_text, double &result)
 {
+    int8_t sign = 1;
+    if (*source_text == MINUS)
+    {
+        source_text ++;
+        sign = -1;
+    }
+    if (*source_text == '\xF7') // Pi character code on LCD
+    {
+        result = M_PI * sign;
+        source_text ++;
+        return SUCCESS;
+    }
+    else if (*source_text == 'e')
+    {
+        result = M_E * sign;
+        source_text ++;
+        return SUCCESS;
+    }
+    else if (sign == -1)
+    {
+        source_text --;
+    }
+
     if (!parse_number(source_text, result))
     {
         return SUCCESS;
@@ -124,18 +147,6 @@ int parse_factor(char * &source_text, double &result)
         source_text += 3;
         return SUCCESS;
     }
-    else if (*source_text == '\xF7')
-    {
-        result = M_PI;
-        source_text ++;
-        return SUCCESS;
-    }
-    else if (*source_text == 'e')
-    {
-        result = M_E;
-        source_text ++;
-        return SUCCESS;
-    }
     
     if (state) return state;
     return state = MAL_EXPR;
@@ -144,12 +155,19 @@ int parse_factor(char * &source_text, double &result)
 int parse_special(char * &source_text, double &result)
 {
     double temp;
+    int8_t sign = 1;
+
+    if (*source_text == MINUS)
+    {
+        source_text ++;
+        sign = -1;
+    }
     if (!strncmp(source_text, "sin", 3))
     {
         source_text += 3;
         if (!parse_factor(source_text, temp))
         {
-            result = sin(temp);
+            result = sin(temp) * sign;
             return SUCCESS;
         }
     }
@@ -158,7 +176,7 @@ int parse_special(char * &source_text, double &result)
         source_text += 3;
         if (!parse_factor(source_text, temp))
         {
-            result = cos(temp);
+            result = cos(temp) * sign;
             return SUCCESS;
         }
     }
@@ -167,7 +185,7 @@ int parse_special(char * &source_text, double &result)
         source_text += 3;
         if (!parse_factor(source_text, temp))
         {
-            result = tan(temp);
+            result = tan(temp) * sign;
             return SUCCESS;
         }
     }
@@ -177,7 +195,7 @@ int parse_special(char * &source_text, double &result)
         if (!parse_factor(source_text, temp))
         {
             if (temp < -1 || temp > 1) return state = TRIG_ERR;
-            result = asin(temp);
+            result = asin(temp) * sign;
             return SUCCESS;
         }
     }
@@ -187,7 +205,7 @@ int parse_special(char * &source_text, double &result)
         if (!parse_factor(source_text, temp))
         {
             if (temp < -1 || temp > 1) return state = TRIG_ERR;
-            result = acos(temp);
+            result = acos(temp) * sign;
             return SUCCESS;
         }
     }
@@ -197,7 +215,7 @@ int parse_special(char * &source_text, double &result)
         if (!parse_factor(source_text, temp))
         {
             if (temp < -1 || temp > 1) return state = TRIG_ERR;
-            result = atan(temp);
+            result = atan(temp) * sign;
             return SUCCESS;
         }
     }
@@ -206,7 +224,7 @@ int parse_special(char * &source_text, double &result)
         source_text += 3;
         if (!parse_factor(source_text, temp))
         {
-            result = temp * (180 / M_PI);
+            result = temp * (180 / M_PI) * sign;
             return SUCCESS;
         }
     }
@@ -215,7 +233,7 @@ int parse_special(char * &source_text, double &result)
         source_text += 3;
         if (!parse_factor(source_text, temp))
         {
-            result = temp * (M_PI / 180);
+            result = temp * (M_PI / 180) * sign;
             return SUCCESS;
         }
     }
@@ -225,7 +243,7 @@ int parse_special(char * &source_text, double &result)
         if (!parse_factor(source_text, temp))
         {
             if (temp <= 0) return state = LOG_ERR;
-            result = log(temp);
+            result = log(temp) * sign;
             return SUCCESS;
         }
     }
@@ -235,14 +253,16 @@ int parse_special(char * &source_text, double &result)
         if (!parse_factor(source_text, temp))
         {
             if (temp <= 0) return state = LOG_ERR;
-            result = log10(temp);
+            result = log10(temp) * sign;
             return SUCCESS;
         }
     }
-    else if (!parse_factor(source_text, result))
+    else if (sign == -1)
     {
-        return SUCCESS;
+        source_text --;
     }
+
+    if (!parse_factor(source_text, result)) return SUCCESS;
 
     if (state) return state;
     return state = MAL_EXPR;
@@ -251,19 +271,31 @@ int parse_special(char * &source_text, double &result)
 int parse_power(char * &source_text, double &result)
 {
     double temp;
-    if (*source_text == (char)ROOT) // square root character
+    int8_t sign = 1;
+
+    if (*source_text == MINUS)
+    {
+        source_text ++;
+        sign = -1;
+    }
+    if (*source_text == (char)ROOT)
     {
         source_text ++;
         if (!parse_special(source_text, result))
         {
             if (result < 0) return state = SQRT_ERR;
-            result = sqrt(result);
+            result = sqrt(result) * sign;
             return SUCCESS;
         }
         else if (state) return state;
         return state = MAL_EXPR;
     }
-    else if (!parse_special(source_text, result))
+    else if (sign == -1)
+    {
+        source_text --;
+    }
+
+    if (!parse_special(source_text, result))
     {
         while (*source_text == POWER)
         {
