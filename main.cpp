@@ -70,6 +70,7 @@ int main(void)
     //LCD.print("Hello Oti :)");
     uint32_t clear_counter = 0;
     uint8_t pressed = 0;
+    uint8_t on_release = 0;
 
     logo_display();
 
@@ -100,15 +101,42 @@ int main(void)
                 case 0x1800: calc.buffer_insert_operator(ROOT);     pressed = 1; break;
                 case 0x1400: calc.buffer_insert_operator(DIVIDE);   pressed = 1; break;
                 case 0x1200: calc.buffer_insert_operator(MINUS);    pressed = 1; break;
+
                 case 0x1080: calc.buffer_insert('(');       pressed = 1; break;
                 case 0x1020: calc.buffer_insert(')');       pressed = 1; break;
 
                 case 0x1100: calc.buffer_insert_text("ANS");    pressed = 1; break;
 
+                case 0x0100:
+                on_release = 1;
+                while (keypress == 0x0100)
+                {
+                    keypress = keypad.value();
+                    switch (keypress)
+                    {
+                        case 0x8100: calc.buffer_insert_text("sin(");  pressed = 1; on_release = 0; break;
+                        case 0x4100: calc.buffer_insert_text("cos(");  pressed = 1; on_release = 0; break;
+                        case 0x2100: calc.buffer_insert_text("tan(");  pressed = 1; on_release = 0; break;
+                        case 0x0900: calc.buffer_insert_text("asin(");  pressed = 1; on_release = 0; break;
+                        case 0x0500: calc.buffer_insert_text("acos(");  pressed = 1; on_release = 0; break;
+                        case 0x0300: calc.buffer_insert_text("atan(");  pressed = 1; on_release = 0; break;
+                        case 0x0180: calc.buffer_insert_text("deg(");  pressed = 1; on_release = 0; break;
+                        case 0x0120: calc.buffer_insert_text("rad(");  pressed = 1; on_release = 0; break;
+
+                        case 0x0100:
+                        case 0x0000: break;
+
+                        default: pressed = 1; on_release = 0; break;
+                    }
+                }
+                if (on_release) calc.toggle_sign();
+                on_release = 0;
+                pressed = 1;
+                break;
+
                 case 0x1040: calc.history_back();       pressed = 1; break;
                 case 0x1004: calc.history_forward();    pressed = 1; break;
 
-                case 0x0100: calc.toggle_sign();        pressed = 1; break;
                 case 0x1010:
                 case 0x0010: calc.buffer_backspace();   pressed = 1; break; 
                 case 0x1001:
@@ -139,7 +167,10 @@ int main(void)
                 }
 
                 case 0x1000:
-                case 0x0000: clear_counter = 0; pressed = 0; break;
+                case 0x0000:
+                clear_counter = 0;
+                pressed = 0;
+                break;
 
                 default: break;
             }
