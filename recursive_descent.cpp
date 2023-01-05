@@ -1,7 +1,10 @@
+#include <cstdlib>
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <cmath>
+#include <cctype>
 #include "recursive_descent.h"
 
 double last_result;
@@ -13,14 +16,80 @@ int parse_expression(char * &source_text, double &result);
 
 int parse_number(char * &source_text, double &result)
 {
-    char * end = source_text;
-    result = strtod(source_text, &end);
-    if (source_text == end)
+    int8_t sign = 1;
+    int8_t exponent_sign = 1;
+    double fractional_part = 0;
+    uint32_t exponent = 0;
+    char * marker;
+
+    result = 0.0;
+
+    switch(*source_text)
     {
-        return 0;
+        case '+': sign = 1; source_text ++; break;
+        case '-': sign = -1; source_text ++; break;
     }
-    source_text = end;
-    return 1;
+
+    if (isdigit(*source_text))
+    {
+        while (isdigit(*source_text)) result = result * 10 + (*source_text ++ - '0');
+    }
+
+    if (*source_text == '.')
+    {
+        marker = ++ source_text;
+
+        if (isdigit(*source_text))
+        {
+            while (isdigit(*source_text)) fractional_part = fractional_part * 10 + (*source_text ++ - '0');
+            result += fractional_part / pow(10.0, (source_text - marker));
+
+            if (*source_text == 'E')
+            {
+                source_text ++;
+
+                switch(*source_text)
+                {
+                    case '+': exponent_sign = 1; source_text ++; break;
+                    case '-': exponent_sign = -1; source_text ++; break;
+                }
+                if (isdigit(*source_text))
+                {
+                    while (isdigit(*source_text)) exponent = exponent * 10 + (*source_text ++ - '0');
+                    result *= pow(10, (double)exponent * exponent_sign) * sign;
+                    return 1;
+                }
+            }
+            else
+            {
+                result *= sign;
+                return 1;
+            }
+        }
+    }
+    else if (*source_text == 'E')
+    {
+        source_text ++;
+        
+        switch(*source_text)
+        {
+            case '+': exponent_sign = 1; source_text ++; break;
+            case '-': exponent_sign = -1; source_text ++; break;
+        }
+        if (isdigit(*source_text))
+        {
+            while (isdigit(*source_text)) exponent = exponent * 10 + (*source_text ++ - '0');
+            result *= pow(10, (double)exponent * exponent_sign) * sign;
+            return 1;
+        }
+    }
+    else
+    {
+        result *= sign;
+        return 1;
+    }
+
+    return 0;
 }
 
 int parse_factor(char * &source_text, double &result)
@@ -38,7 +107,7 @@ int parse_factor(char * &source_text, double &result)
             }
         }
     }
-    else if (source_text[0] == 'A' && source_text[1] == 'N' && source_text[2] == 'S')
+    else if (!strncmp(source_text, "ANS", 3))
     {
         result = last_result;
         source_text += 3;
@@ -65,7 +134,7 @@ int parse_power(char * &source_text, double &result)
         while (*source_text == POWER)
         {
             source_text ++;
-            if (parse_factor(source_text, temp)) result = pow(result, temp);
+            if (parse_special(source_text, temp)) result = pow(result, temp);
             else return 0;
         }
         return 1;

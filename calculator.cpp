@@ -262,6 +262,7 @@ void Calculator::evaluate()
     _expression_buffer[_head] = '\0';
     if (parser(_expression_buffer, _result)) display_result();
     else _LCD.print("Bad expression");
+    _pos = _head;
     _computed = true;
 
     if (strcmp(_expression_buffer, _expression_history[_hist_idx]))
