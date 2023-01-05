@@ -14,7 +14,14 @@ class Calculator
     Calculator();
 
     void buffer_insert(char character);
+    void buffer_insert_digit(uint8_t digit);
     void buffer_insert_operator(enum op op);
+    void buffer_insert_exponent();
+    void buffer_insert_decimal_point();
+    void buffer_insert_open_bracket();
+    void buffer_insert_close_bracket();
+    void buffer_insert_pi();
+    void buffer_insert_e();
     void buffer_insert_text(const char * text);
     void toggle_sign();
     void cursor_left();
@@ -34,7 +41,9 @@ class Calculator
 
     LCD_driver _LCD;
 
+    enum type {DIGIT = 1, OPERATOR = 2, EXPONENT = 3, DECIMAL_POINT = 4, OPEN_BRACKET = 5, CLOSE_BRACKET = 6, TEXT = 7};
     char _expression_buffer[256];
+    enum type _buffer_mask[256];
 
     uint16_t _pos = 0;
     uint16_t _head = 0;

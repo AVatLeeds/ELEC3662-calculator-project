@@ -82,18 +82,18 @@ int main(void)
         {
             switch (keypress)
             {
-                case 0x8000: calc.buffer_insert('1'); pressed = 1; break;
-                case 0x4000: calc.buffer_insert('2'); pressed = 1; break;
-                case 0x2000: calc.buffer_insert('3'); pressed = 1; break;
-                case 0x0800: calc.buffer_insert('4'); pressed = 1; break;
-                case 0x0400: calc.buffer_insert('5'); pressed = 1; break;
-                case 0x0200: calc.buffer_insert('6'); pressed = 1; break;
-                case 0x0080: calc.buffer_insert('7'); pressed = 1; break;
-                case 0x0040: calc.buffer_insert('8'); pressed = 1; break;
-                case 0x0020: calc.buffer_insert('9'); pressed = 1; break;
-                case 0x0008: calc.buffer_insert('.'); pressed = 1; break;
-                case 0x0004: calc.buffer_insert('0'); pressed = 1; break;
-                case 0x0002: calc.buffer_insert('E'); pressed = 1; break;
+                case 0x8000: calc.buffer_insert_digit(1); pressed = 1; break;
+                case 0x4000: calc.buffer_insert_digit(2); pressed = 1; break;
+                case 0x2000: calc.buffer_insert_digit(3); pressed = 1; break;
+                case 0x0800: calc.buffer_insert_digit(4); pressed = 1; break;
+                case 0x0400: calc.buffer_insert_digit(5); pressed = 1; break;
+                case 0x0200: calc.buffer_insert_digit(6); pressed = 1; break;
+                case 0x0080: calc.buffer_insert_digit(7); pressed = 1; break;
+                case 0x0040: calc.buffer_insert_digit(8); pressed = 1; break;
+                case 0x0020: calc.buffer_insert_digit(9); pressed = 1; break;
+                case 0x0008: calc.buffer_insert_decimal_point(); pressed = 1; break;
+                case 0x0004: calc.buffer_insert_digit(0); pressed = 1; break;
+                case 0x0002: calc.buffer_insert_exponent(); pressed = 1; break;
 
                 case 0x9000: calc.buffer_insert_operator(POWER);    pressed = 1; break;
                 case 0x5000: calc.buffer_insert_operator(MULTIPLY); pressed = 1; break;
@@ -102,8 +102,8 @@ int main(void)
                 case 0x1400: calc.buffer_insert_operator(DIVIDE);   pressed = 1; break;
                 case 0x1200: calc.buffer_insert_operator(MINUS);    pressed = 1; break;
 
-                case 0x1080: calc.buffer_insert('(');       pressed = 1; break;
-                case 0x1020: calc.buffer_insert(')');       pressed = 1; break;
+                case 0x1080: calc.buffer_insert_open_bracket();       pressed = 1; break;
+                case 0x1020: calc.buffer_insert_close_bracket();       pressed = 1; break;
 
                 case 0x1100: calc.buffer_insert_text("ANS");    pressed = 1; break;
 
@@ -114,18 +114,19 @@ int main(void)
                     keypress = keypad.value();
                     switch (keypress)
                     {
-                        case 0x8100: calc.buffer_insert_text("sin(");  pressed = 1; on_release = 0; break;
-                        case 0x4100: calc.buffer_insert_text("cos(");  pressed = 1; on_release = 0; break;
-                        case 0x2100: calc.buffer_insert_text("tan(");  pressed = 1; on_release = 0; break;
-                        case 0x0900: calc.buffer_insert_text("asin(");  pressed = 1; on_release = 0; break;
-                        case 0x0500: calc.buffer_insert_text("acos(");  pressed = 1; on_release = 0; break;
-                        case 0x0300: calc.buffer_insert_text("atan(");  pressed = 1; on_release = 0; break;
-                        case 0x0180: calc.buffer_insert_text("deg(");  pressed = 1; on_release = 0; break;
-                        case 0x0120: calc.buffer_insert_text("rad(");  pressed = 1; on_release = 0; break;
-                        case 0x0108: calc.buffer_insert_text("ln(");  pressed = 1; on_release = 0; break;
-                        case 0x0102: calc.buffer_insert_text("log10(");  pressed = 1; on_release = 0; break;
-                        case 0x0140: calc.buffer_insert('\xF7');  pressed = 1; on_release = 0; break;
-                        case 0x0104: calc.buffer_insert('e');  pressed = 1; on_release = 0; break;
+                        case 0x8100: calc.buffer_insert_text("sin("); pressed = 1; on_release = 0; break;
+                        case 0x4100: calc.buffer_insert_text("cos("); pressed = 1; on_release = 0; break;
+                        case 0x2100: calc.buffer_insert_text("tan("); pressed = 1; on_release = 0; break;
+                        case 0x0900: calc.buffer_insert_text("asin("); pressed = 1; on_release = 0; break;
+                        case 0x0500: calc.buffer_insert_text("acos("); pressed = 1; on_release = 0; break;
+                        case 0x0300: calc.buffer_insert_text("atan("); pressed = 1; on_release = 0; break;
+                        case 0x0180: calc.buffer_insert_text("deg("); pressed = 1; on_release = 0; break;
+                        case 0x0120: calc.buffer_insert_text("rad("); pressed = 1; on_release = 0; break;
+                        case 0x0108: calc.buffer_insert_text("ln("); pressed = 1; on_release = 0; break;
+                        case 0x0102: calc.buffer_insert_text("log10("); pressed = 1; on_release = 0; break;
+
+                        case 0x0140: calc.buffer_insert_pi(); pressed = 1; on_release = 0; break;
+                        case 0x0104: calc.buffer_insert_e(); pressed = 1; on_release = 0; break;
 
                         case 0x0100:
                         case 0x0000: break;

@@ -25,13 +25,26 @@ void Calculator::buffer_insert(char character)
 
     if (_pos < _head)
     {
-        for (uint16_t i = _head; i > _pos; _expression_buffer[i] = _expression_buffer[i - 1], i --); 
+        for (uint16_t i = _head; i > _pos; i --)
+        {
+            _buffer_mask[i] = _buffer_mask[i - 1];
+            _expression_buffer[i] = _expression_buffer[i - 1];
+        }
     }
+    _buffer_mask[_pos] = (enum type)0;
     _expression_buffer[_pos++] = character;
     _head ++;
     _window_start += 1 & (_pos == (_window_start + _window_length));
     buffer_redisplay();
     _LCD.cursor_pos(0, _pos - _window_start);
+}
+
+void Calculator::buffer_insert_digit(uint8_t digit)
+{
+    digit %= 10;
+    digit += '0';
+    buffer_insert(digit);
+    _buffer_mask[_pos - 1] = DIGIT;
 }
 
 void Calculator::buffer_insert_operator(enum op op)
@@ -56,6 +69,43 @@ void Calculator::buffer_insert_operator(enum op op)
     }
 
     buffer_insert(op);
+    _buffer_mask[_pos - 1]= OPERATOR;
+}
+
+void Calculator::buffer_insert_exponent()
+{
+    buffer_insert('E');
+    _buffer_mask[_pos - 1] = EXPONENT;
+}
+
+void Calculator::buffer_insert_decimal_point()
+{
+    buffer_insert('.');
+    _buffer_mask[_pos - 1] = DECIMAL_POINT;
+}
+
+void Calculator::buffer_insert_open_bracket()
+{
+    buffer_insert('(');
+    _buffer_mask[_pos - 1] = OPEN_BRACKET;
+}
+
+void Calculator::buffer_insert_close_bracket()
+{
+    buffer_insert(')');
+    _buffer_mask[_pos - 1] = CLOSE_BRACKET;
+}
+
+void Calculator::buffer_insert_pi()
+{
+    buffer_insert('\xF7'); // code for Pi character on LCD
+    _buffer_mask[_pos - 1] = DIGIT;
+}
+
+void Calculator::buffer_insert_e()
+{
+    buffer_insert('e');
+    _buffer_mask[_pos - 1] = DIGIT;
 }
 
 void Calculator::buffer_insert_text(const char * text)
@@ -70,11 +120,16 @@ void Calculator::buffer_insert_text(const char * text)
     while (text[length]) length ++;
     if (_pos < _head)
     {
-        for (uint16_t i = _head + length - 1; i > _pos; _expression_buffer[i] = _expression_buffer[i - length], i --); 
+        for (uint16_t i = _head + length - 1; i > _pos; i --)
+        {
+            _buffer_mask[i] = _buffer_mask[i - length];
+            _expression_buffer[i] = _expression_buffer[i - length]; 
+        }
     }
     length = 0;
     while (text[length])
     {
+        _buffer_mask[_pos] = TEXT;
         _expression_buffer[_pos ++] = text[length ++];
     }
     _head += length;
@@ -92,7 +147,11 @@ void Calculator::buffer_backspace()
         _pos--;
         if (_pos < _head)
         {
-            for (uint16_t i = _pos; i < _head; _expression_buffer[i] = _expression_buffer[i + 1], i ++);
+            for (uint16_t i = _pos; i < _head; i ++)
+            {
+                _buffer_mask[i] = _buffer_mask[i + 1];
+                _expression_buffer[i] = _expression_buffer[i + 1];
+            }
         }
         _head--;
         if (_pos < (_window_start + (_window_length - _view_threshold)) && _window_start)
@@ -215,50 +274,173 @@ void Calculator::toggle_sign()
     uint8_t saved_pos = _pos;
     uint8_t saved_win_start = _window_start;
 
-    while ((isdigit(_expression_buffer[_pos]) || _pos == _head) && _pos)
-    {
-        cursor_left();
-    }
-
     if (_pos == 0)
     {
-        if (_expression_buffer[_pos] == MINUS)
+        AT_BEGINNING:
+        switch (_buffer_mask[_pos])
         {
-            cursor_right();
-            buffer_backspace();
-            if (saved_pos) saved_pos --;
-        }
-        else
-        {
-            buffer_insert(MINUS);
+            case DIGIT:
+            case TEXT:
+            case OPEN_BRACKET:
+            buffer_insert('-');
             saved_pos ++;
+            break;
+
+            case OPERATOR:
+            if (_expression_buffer[_pos] == (char)ROOT)
+            {
+                buffer_insert('-');
+                saved_pos ++;
+            }
+            break;
+
+            default:
+            if (_expression_buffer[_pos] == '-')
+            {
+                _pos ++;
+                buffer_backspace();
+                if (saved_pos) saved_pos --;
+            }
+            else
+            {
+                buffer_insert('-');
+                saved_pos ++;
+            }
         }
     }
-    else if (_expression_buffer[_pos] == MINUS && !isdigit(_expression_buffer[_pos - 1]))
+    else if (_pos == _head)
     {
-        cursor_right();
-        buffer_backspace();
-        if (saved_pos - _pos) saved_pos --;
-    }
-    else if (_expression_buffer[_pos] == '(')
-    {
-        if (_expression_buffer[_pos - 1] == MINUS)
+        _pos --;
+        switch (_buffer_mask[_pos])
         {
-            buffer_backspace();
-            if (saved_pos) saved_pos --;
-        }
-        else
-        {
-            buffer_insert(MINUS);
-            saved_pos ++;
+            case DECIMAL_POINT:
+            case CLOSE_BRACKET:
+            break;
+
+            case DIGIT:
+            goto SEEK;
+            break;
+
+            case TEXT:
+            if (_expression_buffer[_pos] != '(') goto SEEK;
+            default:
+            if (_expression_buffer[_pos] == '-' && _buffer_mask[_pos] != OPERATOR)
+            {
+                _pos ++;
+                buffer_backspace();
+                saved_pos --;
+                break;
+            }
+            else
+            {
+                _pos ++;
+                buffer_insert('-');
+                saved_pos ++;
+            }
+            break;
         }
     }
-    else if (_pos != saved_pos)
+    else
     {
-        cursor_right();
-        buffer_insert(MINUS);
-        saved_pos ++;
+        switch (_buffer_mask[_pos])
+        {
+            case TEXT:
+            case DIGIT:
+            case DECIMAL_POINT:
+            SEEK:
+            if (_buffer_mask[_pos] == TEXT)
+            {
+                while (_buffer_mask[_pos] == TEXT && _pos) _pos --;
+            }
+            else if (_buffer_mask[_pos] == DIGIT || _buffer_mask[_pos] == DECIMAL_POINT)
+            {
+                while ((_buffer_mask[_pos] == DIGIT || _buffer_mask[_pos] == DECIMAL_POINT) && _pos) _pos --;
+            }
+
+            if (_pos)
+            {
+                if (_expression_buffer[_pos] == '-' && _buffer_mask[_pos] != OPERATOR)
+                {
+                    _pos ++;
+                    buffer_backspace();
+                    if (saved_pos) saved_pos --;
+                }
+                else
+                {
+                    _pos ++;
+                    buffer_insert('-');
+                    saved_pos ++;
+                }
+            }
+            else
+            {
+                goto AT_BEGINNING;
+            }
+            break;
+
+            case OPERATOR:
+            if (_expression_buffer[_pos] != (char)ROOT) break;
+            case OPEN_BRACKET:
+            if (_expression_buffer[_pos - 1] == '-' && _buffer_mask[_pos - 1] != OPERATOR)
+            {
+                buffer_backspace();
+                if (saved_pos) saved_pos --;
+            }
+            else
+            {
+                buffer_insert('-');
+                saved_pos ++;
+            }
+            break;
+
+            default: break;
+        }
     }
+
+    // while ((isdigit(_expression_buffer[_pos]) || _pos == _head) && _pos)
+    // {
+    //     _pos --;
+    // }
+
+    // if (_pos == 0)
+    // {
+    //     if (_expression_buffer[_pos] == MINUS)
+    //     {
+    //         _pos ++;
+    //         buffer_backspace();
+    //         if (saved_pos) saved_pos --;
+    //     }
+    //     else if (_expression_buffer[_pos] != 'E' && (isdigit(_expression_buffer[_pos]) || isalpha(_expression_buffer[_pos] || _expression_buffer[_pos] == (char)ROOT)))
+    //     {
+    //         buffer_insert(MINUS);
+    //         saved_pos ++;
+    //     }
+    // }
+    // else if (_expression_buffer[_pos] == MINUS && !isdigit(_expression_buffer[_pos - 1]))
+    // {
+    //     cursor_right();
+    //     buffer_backspace();
+    //     if (saved_pos - _pos) saved_pos --;
+    // }
+    // else if (_expression_buffer[_pos] == '(')
+    // {
+    //     if (_expression_buffer[_pos - 1] == MINUS)
+    //     {
+    //         buffer_backspace();
+    //         if (saved_pos) saved_pos --;
+    //     }
+    //     else
+    //     {
+    //         buffer_insert(MINUS);
+    //         saved_pos ++;
+    //     }
+    // }
+    // else if (_pos != saved_pos)
+    // {
+    //     cursor_right();
+    //     buffer_insert(MINUS);
+    //     saved_pos ++;
+    // }
 
     _pos = saved_pos;
     _window_start = saved_win_start;
