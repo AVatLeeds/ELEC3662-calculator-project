@@ -141,19 +141,36 @@ void Calculator::buffer_insert_text(const char * text)
 void Calculator::buffer_backspace()
 {
     _computed = false;
+    uint8_t length = 0;
 
     if (_pos)
     {
-        _pos--;
-        if (_pos < _head)
+        if (_buffer_mask[_pos - 1] != TEXT)
         {
-            for (uint16_t i = _pos; i < _head; i ++)
+            _pos --;
+            if (_pos < _head)
             {
-                _buffer_mask[i] = _buffer_mask[i + 1];
-                _expression_buffer[i] = _expression_buffer[i + 1];
+                for (uint16_t i = _pos; i < _head; i ++)
+                {
+                    _buffer_mask[i] = _buffer_mask[i + 1];
+                    _expression_buffer[i] = _expression_buffer[i + 1];
+                }
             }
+            _head --;
         }
-        _head--;
+        else
+        {
+            while (_buffer_mask[_pos] == TEXT) _pos ++;
+            while (_buffer_mask[-- _pos] == TEXT) length ++;
+
+            for (uint16_t i = ++ _pos; i < (_head - length); i ++)
+            {
+                _buffer_mask[i] = _buffer_mask[i + length];
+                _expression_buffer[i] = _expression_buffer[i + length];
+            }
+            _head -= length;
+        }
+
         if (_pos < (_window_start + (_window_length - _view_threshold)) && _window_start)
         {
             _window_start --;
@@ -396,51 +413,6 @@ void Calculator::toggle_sign()
             default: break;
         }
     }
-
-    // while ((isdigit(_expression_buffer[_pos]) || _pos == _head) && _pos)
-    // {
-    //     _pos --;
-    // }
-
-    // if (_pos == 0)
-    // {
-    //     if (_expression_buffer[_pos] == MINUS)
-    //     {
-    //         _pos ++;
-    //         buffer_backspace();
-    //         if (saved_pos) saved_pos --;
-    //     }
-    //     else if (_expression_buffer[_pos] != 'E' && (isdigit(_expression_buffer[_pos]) || isalpha(_expression_buffer[_pos] || _expression_buffer[_pos] == (char)ROOT)))
-    //     {
-    //         buffer_insert(MINUS);
-    //         saved_pos ++;
-    //     }
-    // }
-    // else if (_expression_buffer[_pos] == MINUS && !isdigit(_expression_buffer[_pos - 1]))
-    // {
-    //     cursor_right();
-    //     buffer_backspace();
-    //     if (saved_pos - _pos) saved_pos --;
-    // }
-    // else if (_expression_buffer[_pos] == '(')
-    // {
-    //     if (_expression_buffer[_pos - 1] == MINUS)
-    //     {
-    //         buffer_backspace();
-    //         if (saved_pos) saved_pos --;
-    //     }
-    //     else
-    //     {
-    //         buffer_insert(MINUS);
-    //         saved_pos ++;
-    //     }
-    // }
-    // else if (_pos != saved_pos)
-    // {
-    //     cursor_right();
-    //     buffer_insert(MINUS);
-    //     saved_pos ++;
-    // }
 
     _pos = saved_pos;
     _window_start = saved_win_start;

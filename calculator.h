@@ -45,8 +45,8 @@ class Calculator
     char _expression_buffer[256];
     enum type _buffer_mask[256];
 
-    uint16_t _pos = 0;
-    uint16_t _head = 0;
+    uint8_t _pos = 0;
+    uint8_t _head = 0;
     uint8_t _window_start = 0;
     uint8_t _window_length = 16;
     uint8_t _view_threshold = 4;
