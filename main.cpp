@@ -69,6 +69,7 @@ int main(void)
     status = WHITE;
     //LCD.print("Hello Oti :)");
     uint32_t clear_counter = 0;
+    uint32_t traverse_counter = 0;
     uint8_t pressed = 0;
     uint8_t on_release = 0;
 
@@ -152,6 +153,7 @@ int main(void)
 
                 default: break;             
             }
+            delay_us(1); // delay is not accurate !!
         }
         else
         {
@@ -171,9 +173,36 @@ int main(void)
                     break;
                 }
 
+                case 0x1008:
+                if (traverse_counter >= 20000) // should be 2000000 if delay were actually 1us
+                {
+                    calc.cursor_home();
+                    traverse_counter = 0;
+                    break;
+                }
+                else
+                {
+                    traverse_counter ++;
+                    break;
+                }
+
+                case 0x1002:
+                if (traverse_counter >= 20000) // should be 2000000 if delay were actually 1us
+                {
+                    calc.cursor_end();
+                    traverse_counter = 0;
+                    break;
+                }
+                else
+                {
+                    traverse_counter ++;
+                    break;
+                }
+
                 case 0x1000:
                 case 0x0000:
                 clear_counter = 0;
+                traverse_counter = 0;
                 pressed = 0;
                 break;
 
