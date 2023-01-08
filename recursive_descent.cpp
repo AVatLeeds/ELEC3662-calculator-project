@@ -1,11 +1,25 @@
 #include <cstdlib>
-#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <cmath>
 #include <cctype>
 #include "recursive_descent.h"
+
+// EBNF specification of parser
+
+// digit = ( "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" )
+// integer = digit { digit }
+// fraction = "." digit { digit }
+// exponent = "E" [ "-" ] digit { digit }
+// number = ( ( [ "-" ] integer [ fraction ] ) | ( [ "-" ] [ integer ] fraction ) ) [ exponent ]
+// factor = ( [ "-" ] π ) | ( [ "-" ] e ) | ( [ "-" ] "ANS" ) | ( [ "-" ] "(" expression ")" ) | number
+// trigonometric = ( [ "-" ] "sin" factor ) | ( [ "-" ] "cos" factor ) | ( [ "-" ] "tan" factor ) | ( [ "-" ] "asin" factor ) | ( [ "-" ] "acos" factor ) | ( [ "-" ] "atan" factor ) | ( [ "-" ] "deg" factor ) | ( [ "-" ] "rad" factor )
+// logarithm = ( [ "-" ] "ln" factor ) | ( [ "-" ] "log10" factor )
+// special = trigonometric | logarithm | factor
+// power = ( [ "-" ] "√" special ) | ( special "^" special )
+// term = power [ "x" | "÷" ] power
+// expression = term [ "+" | "-" ] term.
 
 # define M_PI		3.14159265358979323846
 # define M_E		2.7182818284590452354
@@ -120,15 +134,6 @@ int parse_factor(char * &source_text, double &result)
         source_text ++;
         return SUCCESS;
     }
-    else if (sign == -1)
-    {
-        source_text --;
-    }
-
-    if (!parse_number(source_text, result))
-    {
-        return SUCCESS;
-    }
     else if (*source_text == '(')
     {
         source_text ++;
@@ -136,6 +141,7 @@ int parse_factor(char * &source_text, double &result)
         {
             if (*source_text == ')')
             {
+                result *= sign;
                 source_text ++;
                 return SUCCESS;
             }
@@ -143,8 +149,17 @@ int parse_factor(char * &source_text, double &result)
     }
     else if (!strncmp(source_text, "ANS", 3))
     {
-        result = last_result;
+        result = last_result * sign;
         source_text += 3;
+        return SUCCESS;
+    }
+    else if (sign == -1)
+    {
+        source_text --;
+    }
+
+    if (!parse_number(source_text, result))
+    {
         return SUCCESS;
     }
     
@@ -214,7 +229,6 @@ int parse_special(char * &source_text, double &result)
         source_text += 4;
         if (!parse_factor(source_text, temp))
         {
-            if (temp < -1 || temp > 1) return state = TRIG_ERR;
             result = atan(temp) * sign;
             return SUCCESS;
         }
