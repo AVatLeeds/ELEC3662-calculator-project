@@ -9,7 +9,7 @@ SRAM             0x0000000020000000 0x0000000000008000 xrw
 Linker script and memory map
 
 
-.text           0x0000000000000000      0x4a0
+.text           0x0000000000000000     0x74d4
                 0x0000000000000000                __text_start = .
  TM4C123GXL_RTE.o(.vector_table)
  .vector_table  0x0000000000000000      0x21c TM4C123GXL_RTE.o
@@ -20,7 +20,7 @@ Linker script and memory map
                 0x0000000000000220                . = ALIGN (0x4)
                 0x0000000000000220                __init_array_end = .
  *(.text)
- .text          0x0000000000000220       0xe4 TM4C123GXL_RTE.o
+ .text          0x0000000000000220      0x104 TM4C123GXL_RTE.o
                 0x0000000000000220                _ISR_timer16_1A
                 0x0000000000000220                _ISR_timer32_5B
                 0x0000000000000220                _ISR_timer16_1B
@@ -109,107 +109,252 @@ Linker script and memory map
                 0x0000000000000220                _ISR_PWM0_generator_2
                 0x0000000000000220                _ISR_GPIO_port_C
                 0x0000000000000220                _ISR_timer32_0B
-                0x0000000000000226                clock_setup
-                0x0000000000000280                reset
- .text          0x0000000000000304      0x19c project.o
-                0x0000000000000304                main
-                0x0000000000000318                hard_fault()
-                0x000000000000032c                usage_fault()
-                0x0000000000000340                bus_fault()
-                0x0000000000000390                status_LED::status_LED()
-                0x0000000000000390                status_LED::status_LED()
-                0x00000000000003e4                status_LED::set_status(unsigned char)
-                0x0000000000000434                status_LED::get_status()
-                0x000000000000044c                status_LED::operator=(unsigned char)
-                0x00000000000004a0                . = ALIGN (0x4)
-                0x00000000000004a0                __text_end = .
+                0x0000000000000222                _sbrk
+                0x0000000000000254                clock_setup
+                0x0000000000000290                reset
+ *fill*         0x0000000000000324       0x1c 
+ .text          0x0000000000000340     0x7194 project.o
+                0x0000000000000340                logo_display()
+                0x000000000000056c                keypad_state_test()
+                0x0000000000000610                main
+                0x0000000000000a50                hard_fault()
+                0x0000000000000a60                usage_fault()
+                0x0000000000000a70                bus_fault()
+                0x0000000000000a80                NMI()
+                0x0000000000000a90                _ISR_system_control()
+                0x0000000000000ac8                status_LED::status_LED()
+                0x0000000000000ac8                status_LED::status_LED()
+                0x0000000000000b04                status_LED::set_status(unsigned char)
+                0x0000000000000b2c                status_LED::get_status()
+                0x0000000000000b30                status_LED::operator=(unsigned char)
+                0x0000000000000b5c                Keypad::Keypad()
+                0x0000000000000b5c                Keypad::Keypad()
+                0x0000000000000ba4                Keypad::value()
+                0x0000000000000c4c                LCD_driver::_write_lower_nibble(unsigned char)
+                0x0000000000000cdc                LCD_driver::_write_upper_nibble(unsigned char)
+                0x0000000000000d68                LCD_driver::_check_busy()
+                0x0000000000000e70                LCD_driver::_command(unsigned char)
+                0x0000000000000e9c                LCD_driver::LCD_driver()
+                0x0000000000000e9c                LCD_driver::LCD_driver()
+                0x0000000000001020                LCD_driver::clear()
+                0x000000000000102a                LCD_driver::display_on()
+                0x0000000000001042                LCD_driver::display_off()
+                0x000000000000105a                LCD_driver::cursor_on()
+                0x0000000000001072                LCD_driver::cursor_off()
+                0x000000000000108a                LCD_driver::cursor_blink_on()
+                0x00000000000010a2                LCD_driver::cursor_blink_off()
+                0x00000000000010ba                LCD_driver::putchar(char)
+                0x00000000000010e8                LCD_driver::print(char const*)
+                0x0000000000001102                LCD_driver::cursor_pos(unsigned char, unsigned char)
+                0x0000000000001120                Calculator::Calculator()
+                0x0000000000001120                Calculator::Calculator()
+                0x0000000000001170                Calculator::clear_result()
+                0x0000000000001198                Calculator::buffer_redisplay()
+                0x00000000000011e8                Calculator::buffer_backspace()
+                0x0000000000001346                Calculator::buffer_clear()
+                0x0000000000001368                Calculator::buffer_insert(char, Calculator::type)
+                0x0000000000001428                Calculator::buffer_insert_digit(unsigned char)
+                0x000000000000144c                Calculator::buffer_insert_exponent()
+                0x0000000000001458                Calculator::buffer_insert_decimal_point()
+                0x0000000000001464                Calculator::buffer_insert_open_bracket()
+                0x0000000000001470                Calculator::buffer_insert_close_bracket()
+                0x000000000000147c                Calculator::buffer_insert_pi()
+                0x0000000000001488                Calculator::buffer_insert_e()
+                0x0000000000001494                Calculator::buffer_insert_text(char const*)
+                0x00000000000015d2                Calculator::buffer_insert_operator(op)
+                0x0000000000001620                Calculator::cursor_left()
+                0x0000000000001672                Calculator::cursor_right()
+                0x00000000000016c0                Calculator::cursor_home()
+                0x00000000000016e8                Calculator::cursor_end()
+                0x0000000000001722                Calculator::history_back()
+                0x00000000000017f8                Calculator::history_forward()
+                0x00000000000018b8                Calculator::toggle_sign()
+                0x0000000000001b4c                Calculator::display_result()
+                0x0000000000001e34                Calculator::evaluate()
+                0x0000000000001f60                parse_number(char*&, double&)
+                0x0000000000002274                parse_expression(char*&, double&)
+                0x0000000000002304                parse_factor(char*&, double&)
+                0x0000000000002410                parse_special(char*&, double&)
+                0x00000000000027dc                parse_power(char*&, double&)
+                0x000000000000298c                parse_term(char*&, double&)
+                0x0000000000002a1c                parser(char*, double&)
+                0x0000000000002a58                atan
+                0x0000000000002d68                cos
+                0x0000000000002dfc                fabs
+                0x0000000000002e04                frexp
+                0x0000000000002e68                round
+                0x0000000000002f04                sin
+                0x0000000000002f8c                tan
+                0x0000000000002fe8                acos
+                0x000000000000308c                asin
+                0x0000000000003130                log
+                0x0000000000003228                log10
+                0x0000000000003324                pow
+                0x0000000000003638                sqrt
+                0x00000000000036f8                __ieee754_acos
+                0x0000000000003ba0                __ieee754_asin
+                0x0000000000004018                __ieee754_log
+                0x00000000000043b0                __ieee754_log10
+                0x00000000000044c8                __ieee754_pow
+                0x0000000000004f90                __ieee754_rem_pio2
+                0x00000000000053cc                __ieee754_sqrt
+                0x0000000000005550                __kernel_cos
+                0x0000000000005798                __kernel_rem_pio2
+                0x0000000000005fd8                __kernel_sin
+                0x0000000000006148                __kernel_tan
+                0x00000000000064ec                finite
+                0x00000000000064f8                floor
+                0x0000000000006600                matherr
+                0x0000000000006604                nan
+                0x0000000000006610                rint
+                0x0000000000006728                scalbn
+                0x000000000000681c                __aeabi_drsub
+                0x0000000000006824                __aeabi_dsub
+                0x0000000000006824                __subdf3
+                0x0000000000006828                __adddf3
+                0x0000000000006828                __aeabi_dadd
+                0x0000000000006aa0                __aeabi_ui2d
+                0x0000000000006aa0                __floatunsidf
+                0x0000000000006ac0                __floatsidf
+                0x0000000000006ac0                __aeabi_i2d
+                0x0000000000006ae4                __extendsfdf2
+                0x0000000000006ae4                __aeabi_f2d
+                0x0000000000006b28                __aeabi_ul2d
+                0x0000000000006b28                __floatundidf
+                0x0000000000006b38                __floatdidf
+                0x0000000000006b38                __aeabi_l2d
+                0x0000000000006b94                __aeabi_dmul
+                0x0000000000006b94                __muldf3
+                0x0000000000006de8                __aeabi_ddiv
+                0x0000000000006de8                __divdf3
+                0x0000000000006fb8                __gtdf2
+                0x0000000000006fb8                __gedf2
+                0x0000000000006fc0                __ltdf2
+                0x0000000000006fc0                __ledf2
+                0x0000000000006fc8                __cmpdf2
+                0x0000000000006fc8                __eqdf2
+                0x0000000000006fc8                __nedf2
+                0x0000000000007044                __aeabi_cdrcmple
+                0x0000000000007054                __aeabi_cdcmple
+                0x0000000000007054                __aeabi_cdcmpeq
+                0x0000000000007064                __aeabi_dcmpeq
+                0x0000000000007078                __aeabi_dcmplt
+                0x000000000000708c                __aeabi_dcmple
+                0x00000000000070a0                __aeabi_dcmpge
+                0x00000000000070b4                __aeabi_dcmpgt
+                0x00000000000070c8                __aeabi_dcmpun
+                0x00000000000070c8                __unorddf2
+                0x00000000000070f4                __fixdfsi
+                0x00000000000070f4                __aeabi_d2iz
+                0x0000000000007144                __errno
+                0x0000000000007168                strcmp
+                0x000000000000743c                strncmp
+                0x00000000000074d4                . = ALIGN (0x4)
+                0x00000000000074d4                __text_end = .
 
-.glue_7         0x00000000000004a0        0x0
- .glue_7        0x00000000000004a0        0x0 linker stubs
+.glue_7         0x00000000000074d4        0x0
+ .glue_7        0x00000000000074d4        0x0 linker stubs
 
-.glue_7t        0x00000000000004a0        0x0
- .glue_7t       0x00000000000004a0        0x0 linker stubs
+.glue_7t        0x00000000000074d4        0x0
+ .glue_7t       0x00000000000074d4        0x0 linker stubs
 
-.vfp11_veneer   0x00000000000004a0        0x0
- .vfp11_veneer  0x00000000000004a0        0x0 linker stubs
+.vfp11_veneer   0x00000000000074d4        0x0
+ .vfp11_veneer  0x00000000000074d4        0x0 linker stubs
 
-.v4_bx          0x00000000000004a0        0x0
- .v4_bx         0x00000000000004a0        0x0 linker stubs
+.v4_bx          0x00000000000074d4        0x0
+ .v4_bx         0x00000000000074d4        0x0 linker stubs
 
-.iplt           0x00000000000004a0        0x0
- .iplt          0x00000000000004a0        0x0 TM4C123GXL_RTE.o
+.iplt           0x00000000000074d4        0x0
+ .iplt          0x00000000000074d4        0x0 TM4C123GXL_RTE.o
 
-.rel.dyn        0x00000000000004a0        0x0
- .rel.iplt      0x00000000000004a0        0x0 TM4C123GXL_RTE.o
-
-.rodata         0x00000000000004a0        0x0
+.rodata         0x00000000000074d8      0x22c
  *(.rodata)
-                0x00000000000004a0                . = ALIGN (0x4)
+ .rodata        0x00000000000074d8      0x22c project.o
+                0x0000000000007700                _global_impure_ptr
+                0x0000000000007704                . = ALIGN (0x4)
 
-.data           0x00000000000004a0        0x0 load address 0x0000000020000000
-                0x00000000000004a0                __data_start = .
+.rodata.str1.4  0x0000000000007704      0x1b8
+ .rodata.str1.4
+                0x0000000000007704      0x1b8 project.o
+                                        0x1e9 (size before relaxing)
+
+.rel.dyn        0x00000000000078bc        0x0
+ .rel.iplt      0x00000000000078bc        0x0 TM4C123GXL_RTE.o
+
+.data           0x0000000020000000       0x68 load address 0x00000000000078bc
+                0x0000000020000000                __data_start = .
  *(.data)
- .data          0x00000000000004a0        0x0 TM4C123GXL_RTE.o
- .data          0x00000000000004a0        0x0 project.o
-                0x00000000000004a0                . = ALIGN (0x4)
-                0x00000000000004a0                __data_end = .
+ .data          0x0000000020000000        0x0 TM4C123GXL_RTE.o
+ .data          0x0000000020000000       0x68 project.o
+                0x0000000020000000                __fdlib_version
+                0x0000000020000004                _impure_ptr
+                0x0000000020000068                . = ALIGN (0x4)
+                0x0000000020000068                __data_end = .
 
-.igot.plt       0x00000000000004a0        0x0 load address 0x0000000020000000
- .igot.plt      0x00000000000004a0        0x0 TM4C123GXL_RTE.o
+.igot.plt       0x0000000020000068        0x0 load address 0x0000000000007924
+ .igot.plt      0x0000000020000068        0x0 TM4C123GXL_RTE.o
 
-.bss            0x0000000020000000        0x4
-                0x0000000020000000                __bss_start = .
+.bss            0x0000000020000068     0x4258
+                0x0000000020000068                __bss_start = .
  *(.bss)
- .bss           0x0000000020000000        0x0 TM4C123GXL_RTE.o
- .bss           0x0000000020000000        0x1 project.o
-                0x0000000020000000                status
-                0x0000000020000004                . = ALIGN (0x4)
- *fill*         0x0000000020000001        0x3 
-                0x0000000020000004                __bss_end = .
+ .bss           0x0000000020000068        0x4 TM4C123GXL_RTE.o
+ *fill*         0x000000002000006c        0x4 
+ .bss           0x0000000020000070     0x4250 project.o
+                0x0000000020000070                LCD
+                0x0000000020000074                keypad
+                0x0000000020000078                status
+                0x0000000020000080                calc
+                0x00000000200042a8                y
+                0x00000000200042ac                x
+                0x00000000200042b0                state
+                0x00000000200042b8                last_result
+ *(.bss.*)
+                0x00000000200042c0                . = ALIGN (0x4)
+                0x00000000200042c0                __bss_end = .
+
+.heap           0x00000000200042c0        0x0
+                0x00000000200042c0                __heap_start = .
+ TM4C123GXL_RTE.o(.heap)
+                0x00000000200042c0                __heap_end = .
 LOAD TM4C123GXL_RTE.o
 LOAD project.o
 OUTPUT(firmware.o elf32-littlearm)
-LOAD linker stubs
 
-.noinit         0x0000000020000004        0x1
- .noinit        0x0000000020000004        0x1 project.o
-
-.debug_info     0x0000000000000000     0x1272
- .debug_info    0x0000000000000000      0xc1f TM4C123GXL_RTE.o
- .debug_info    0x0000000000000c1f      0x653 project.o
-
-.debug_abbrev   0x0000000000000000      0x3da
- .debug_abbrev  0x0000000000000000      0x13d TM4C123GXL_RTE.o
- .debug_abbrev  0x000000000000013d      0x29d project.o
-
-.debug_aranges  0x0000000000000000       0x60
- .debug_aranges
-                0x0000000000000000       0x20 TM4C123GXL_RTE.o
- .debug_aranges
-                0x0000000000000020       0x40 project.o
-
-.debug_line     0x0000000000000000      0x291
- .debug_line    0x0000000000000000       0xf5 TM4C123GXL_RTE.o
- .debug_line    0x00000000000000f5      0x19c project.o
-
-.debug_str      0x0000000000000000      0xa35
- .debug_str     0x0000000000000000      0x753 TM4C123GXL_RTE.o
-                                        0x791 (size before relaxing)
- .debug_str     0x0000000000000753      0x2e2 project.o
-                                        0x5c9 (size before relaxing)
-
-.comment        0x0000000000000000       0x51
- .comment       0x0000000000000000       0x51 TM4C123GXL_RTE.o
-                                         0x52 (size before relaxing)
- .comment       0x0000000000000051       0xa4 project.o
+.comment        0x0000000000000000       0xae
+ .comment       0x0000000000000000       0x57 TM4C123GXL_RTE.o
+                                         0x58 (size before relaxing)
+ .comment       0x0000000000000057       0x57 project.o
+                                        0xdc0 (size before relaxing)
 
 .ARM.attributes
-                0x0000000000000000       0x34
+                0x0000000000000000       0x31
  .ARM.attributes
-                0x0000000000000000       0x34 TM4C123GXL_RTE.o
+                0x0000000000000000       0x33 TM4C123GXL_RTE.o
  .ARM.attributes
-                0x0000000000000034       0x34 project.o
+                0x0000000000000033       0x31 project.o
 
-.debug_frame    0x0000000000000000      0x1dc
- .debug_frame   0x0000000000000000       0x6c TM4C123GXL_RTE.o
- .debug_frame   0x000000000000006c      0x170 project.o
+.debug_aranges  0x0000000000000000      0x4f0
+ .debug_aranges
+                0x0000000000000000      0x4f0 project.o
+
+.debug_info     0x0000000000000000    0x160aa
+ .debug_info    0x0000000000000000    0x160aa project.o
+
+.debug_abbrev   0x0000000000000000     0x4b89
+ .debug_abbrev  0x0000000000000000     0x4b89 project.o
+
+.debug_line     0x0000000000000000     0x4275
+ .debug_line    0x0000000000000000     0x4275 project.o
+
+.debug_frame    0x0000000000000000      0x9e0
+ .debug_frame   0x0000000000000000      0x9e0 project.o
+
+.debug_str      0x0000000000000000     0x123d
+ .debug_str     0x0000000000000000     0x123d project.o
+                                       0xd6c7 (size before relaxing)
+
+.debug_loc      0x0000000000000000     0x5686
+ .debug_loc     0x0000000000000000     0x5686 project.o
+
+.debug_ranges   0x0000000000000000      0x2a0
+ .debug_ranges  0x0000000000000000      0x2a0 project.o
