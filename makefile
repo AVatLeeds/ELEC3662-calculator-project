@@ -1,8 +1,8 @@
 CC = arm-none-eabi-gcc
 CPP = arm-none-eabi-g++
 
-CFLAGS =	-g\
-			-O0\
+CFLAGS =	-g0\
+			-O1\
 			-Wall\
 			-mthumb\
 			-mno-thumb-interwork\
@@ -10,7 +10,6 @@ CFLAGS =	-g\
 			-mfloat-abi=soft\
 			-nostartfiles\
 			-fno-rtti\
-			-fsingle-precision-constant\
 			-fno-exceptions\
 			-specs=nano.specs\
 			-static\
