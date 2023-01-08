@@ -15,13 +15,16 @@ Calculator::Calculator() : _LCD()
     _LCD.cursor_pos(0, 0);
 }
 
-void Calculator::buffer_insert(char character)
+void Calculator::buffer_insert(char character, enum type type)
 {
     if (_computed)
     {
         _computed = false;
+        _hist_back = false;
         buffer_clear();
     }
+
+    if (_buffer_mask[_pos] == TEXT && (_buffer_mask[_pos - 1] == TEXT && _expression_buffer[_pos - 1] != '(')) return;
 
     if (_pos < _head)
     {
@@ -31,7 +34,7 @@ void Calculator::buffer_insert(char character)
             _expression_buffer[i] = _expression_buffer[i - 1];
         }
     }
-    _buffer_mask[_pos] = (enum type)0;
+    _buffer_mask[_pos] = type;
     _expression_buffer[_pos++] = character;
     _head ++;
     _window_start += 1 & (_pos == (_window_start + _window_length));
@@ -43,8 +46,7 @@ void Calculator::buffer_insert_digit(uint8_t digit)
 {
     digit %= 10;
     digit += '0';
-    buffer_insert(digit);
-    _buffer_mask[_pos - 1] = DIGIT;
+    buffer_insert(digit, DIGIT);
 }
 
 void Calculator::buffer_insert_operator(enum op op)
@@ -68,44 +70,37 @@ void Calculator::buffer_insert_operator(enum op op)
         default: break;
     }
 
-    buffer_insert(op);
-    _buffer_mask[_pos - 1]= OPERATOR;
+    buffer_insert(op, OPERATOR);
 }
 
 void Calculator::buffer_insert_exponent()
 {
-    buffer_insert('E');
-    _buffer_mask[_pos - 1] = EXPONENT;
+    buffer_insert('E', EXPONENT);
 }
 
 void Calculator::buffer_insert_decimal_point()
 {
-    buffer_insert('.');
-    _buffer_mask[_pos - 1] = DECIMAL_POINT;
+    buffer_insert('.', DECIMAL_POINT);
 }
 
 void Calculator::buffer_insert_open_bracket()
 {
-    buffer_insert('(');
-    _buffer_mask[_pos - 1] = OPEN_BRACKET;
+    buffer_insert('(', OPEN_BRACKET);
 }
 
 void Calculator::buffer_insert_close_bracket()
 {
-    buffer_insert(')');
-    _buffer_mask[_pos - 1] = CLOSE_BRACKET;
+    buffer_insert(')', CLOSE_BRACKET);
 }
 
 void Calculator::buffer_insert_pi()
 {
-    buffer_insert('\xF7'); // code for Pi character on LCD
-    _buffer_mask[_pos - 1] = DIGIT;
+    buffer_insert('\xF7', DIGIT); // code for Pi character on LCD
 }
 
 void Calculator::buffer_insert_e()
 {
-    buffer_insert('e');
-    _buffer_mask[_pos - 1] = DIGIT;
+    buffer_insert('e', DIGIT);
 }
 
 void Calculator::buffer_insert_text(const char * text)
@@ -113,8 +108,11 @@ void Calculator::buffer_insert_text(const char * text)
     if (_computed)
     {
         _computed = false;
+        _hist_back = false;
         buffer_clear();
     }
+
+    if (_buffer_mask[_pos] == TEXT && (_buffer_mask[_pos - 1] == TEXT && _expression_buffer[_pos - 1] != '(')) return;
 
     unsigned int length = 0;
     while (text[length]) length ++;
@@ -132,6 +130,7 @@ void Calculator::buffer_insert_text(const char * text)
         _buffer_mask[_pos] = TEXT;
         _expression_buffer[_pos ++] = text[length ++];
     }
+    _buffer_mask[_pos] = DEFAULT;
     _head += length;
     if (_pos >= (_window_start + _window_length)) _window_start += length;
     buffer_redisplay();
@@ -160,10 +159,24 @@ void Calculator::buffer_backspace()
         }
         else
         {
-            while (_buffer_mask[_pos] == TEXT) _pos ++;
-            while (_buffer_mask[-- _pos] == TEXT) length ++;
+            _pos --;
+            while (_buffer_mask[_pos] == TEXT)
+            {
+                if (_expression_buffer[_pos] == '(')
+                {
+                    length ++;
+                    break;
+                }
+                _pos ++;
+            }
+            while (_buffer_mask[-- _pos] == TEXT)
+            {
+                if (_expression_buffer[_pos] == '(') break;
+                length ++;
+                if (_pos == 0) break;
+            }
 
-            for (uint16_t i = ++ _pos; i < (_head - length); i ++)
+            for (uint16_t i = (_pos) ? ++ _pos : _pos; i < (_head - length); i ++)
             {
                 _buffer_mask[i] = _buffer_mask[i + length];
                 _expression_buffer[i] = _expression_buffer[i + length];
@@ -219,11 +232,28 @@ void Calculator::cursor_right()
     }
 }
 
+void Calculator::cursor_home()
+{
+    _pos = 0;
+    _window_start = 0;
+    buffer_redisplay();
+    _LCD.cursor_pos(0, _pos - _window_start);
+}
+
+void Calculator::cursor_end()
+{
+    _pos = _head;
+    _window_start = (_pos >= _window_length) ? _pos - (_window_length - 1) : 0;
+    buffer_redisplay();
+    _LCD.cursor_pos(0, _pos - _window_start);
+}
+
 void Calculator::history_back()
 {
     _window_start = 0;
     _head = 0;
 
+    _hist_back = true;
     if (_computed) _hist_idx = _hist_head;
 
     if (!_hist_overflow || _hist_head == (HISTORY_LENGTH - 1))
@@ -246,11 +276,11 @@ void Calculator::history_back()
 
 void Calculator::history_forward()
 {
-    _window_start = 0;
-    _head = 0;
-
-    if (!_computed)
+    if (_hist_back)
     {
+        _window_start = 0;
+        _head = 0;
+        
         if (!_hist_overflow)
         {
             _hist_idx = (_hist_idx < _hist_head) ? _hist_idx + 1 : _hist_head;
@@ -291,6 +321,15 @@ void Calculator::toggle_sign()
     uint8_t saved_pos = _pos;
     uint8_t saved_win_start = _window_start;
 
+    if (_computed)
+    {
+        _computed = false;
+        _hist_back = false;
+        _pos = 0;
+        saved_pos = 0;
+        buffer_clear();
+    }
+
     if (_pos == 0)
     {
         AT_BEGINNING:
@@ -299,14 +338,14 @@ void Calculator::toggle_sign()
             case DIGIT:
             case TEXT:
             case OPEN_BRACKET:
-            buffer_insert('-');
+            buffer_insert('-', DEFAULT);
             saved_pos ++;
             break;
 
             case OPERATOR:
             if (_expression_buffer[_pos] == (char)ROOT)
             {
-                buffer_insert('-');
+                buffer_insert('-', DEFAULT);
                 saved_pos ++;
             }
             break;
@@ -320,7 +359,7 @@ void Calculator::toggle_sign()
             }
             else
             {
-                buffer_insert('-');
+                buffer_insert('-', DEFAULT);
                 saved_pos ++;
             }
         }
@@ -351,7 +390,7 @@ void Calculator::toggle_sign()
             else
             {
                 _pos ++;
-                buffer_insert('-');
+                buffer_insert('-', DEFAULT);
                 saved_pos ++;
             }
             break;
@@ -367,7 +406,8 @@ void Calculator::toggle_sign()
             SEEK:
             if (_buffer_mask[_pos] == TEXT)
             {
-                while (_buffer_mask[_pos] == TEXT && _pos) _pos --;
+                _pos --;
+                while (_buffer_mask[_pos] == TEXT && _pos && _expression_buffer[_pos] != '(') _pos --;
             }
             else if (_buffer_mask[_pos] == DIGIT || _buffer_mask[_pos] == DECIMAL_POINT)
             {
@@ -385,7 +425,7 @@ void Calculator::toggle_sign()
                 else
                 {
                     _pos ++;
-                    buffer_insert('-');
+                    buffer_insert('-', DEFAULT);
                     saved_pos ++;
                 }
             }
@@ -405,7 +445,7 @@ void Calculator::toggle_sign()
             }
             else
             {
-                buffer_insert('-');
+                buffer_insert('-', DEFAULT);
                 saved_pos ++;
             }
             break;
@@ -440,6 +480,7 @@ void Calculator::evaluate()
     }
     _pos = _head;
     _computed = true;
+    _hist_back = false;
 
     if (strcmp(_expression_buffer, _expression_history[_hist_idx]))
     {

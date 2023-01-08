@@ -5,15 +5,17 @@
 #include "LCD_driver.h"
 #include "recursive_descent.h"
 
-#define HISTORY_LENGTH  16
+#define HISTORY_LENGTH  64
 
 class Calculator
 {
     public:
+
+    enum type {DEFAULT, DIGIT, OPERATOR, EXPONENT, DECIMAL_POINT, OPEN_BRACKET, CLOSE_BRACKET, TEXT};
     
     Calculator();
 
-    void buffer_insert(char character);
+    void buffer_insert(char character, enum type type);
     void buffer_insert_digit(uint8_t digit);
     void buffer_insert_operator(enum op op);
     void buffer_insert_exponent();
@@ -26,6 +28,8 @@ class Calculator
     void toggle_sign();
     void cursor_left();
     void cursor_right();
+    void cursor_home();
+    void cursor_end();
     void history_back();
     void history_forward();
     void buffer_backspace();
@@ -41,7 +45,6 @@ class Calculator
 
     LCD_driver _LCD;
 
-    enum type {DIGIT = 1, OPERATOR = 2, EXPONENT = 3, DECIMAL_POINT = 4, OPEN_BRACKET = 5, CLOSE_BRACKET = 6, TEXT = 7};
     char _expression_buffer[256];
     enum type _buffer_mask[256];
 
@@ -55,6 +58,7 @@ class Calculator
     int8_t _hist_idx = 0;
     uint8_t _hist_head = 0;
     bool _hist_overflow = false;
+    bool _hist_back = false;
 
     double _result;
     char _result_buffer[16];
