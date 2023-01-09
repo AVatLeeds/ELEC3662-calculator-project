@@ -23,6 +23,9 @@ Dependencies (Debian packages):
 
 ## Release Version 0.1 - Features
 
+**Video:**
+[![Video](./media/thumbnail.png)](./media/output.mp4)
+
 My calculator provides a 256 character buffer for entering mathematical expressions, with a line editing system supporting scrolling of lines longer that the 16 character width of the display, with left and right movement of the cursor and insertion and deletion of characters from any position within the input expression. Expressions are entered using the 16-key keypad and displayed on the upper row of the LCD display. All computations are done using double precision floating point arithmetic and the results displayed on the lower row of the LCD. My calculator provides a history of previously computed expressions 64 entries long and a mechanism for including previously computed results as part of input expressions. 
 
 ![Keypad layout](./media/text1232.png)
