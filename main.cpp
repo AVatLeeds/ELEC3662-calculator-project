@@ -153,7 +153,7 @@ int main(void)
 
                 default: break;             
             }
-            delay_us(1); // delay is not accurate !!
+            delay_us(100); // delay is not accurate !!
         }
         else
         {
@@ -203,7 +203,9 @@ int main(void)
                 case 0x0000:
                 clear_counter = 0;
                 traverse_counter = 0;
-                pressed = 0;
+                delay_us(100);
+                keypress = keypad.value();
+                if (keypress == 0x0000 || keypress == 0x1000) pressed = 0;
                 break;
 
                 default: break;
